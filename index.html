@@ -11,33 +11,29 @@
         :root { --blue: #002244; --red: #C60C30; --gold: #f39c12; --bg: #121212; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: #fff; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
         
-        /* Containers */
-        .card { background: white; color: #333; padding: 15px; border-radius: 12px; width: 100%; max-width: 900px; margin-bottom: 15px; box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .card { background: white; color: #333; padding: 15px; border-radius: 12px; width: 100%; max-width: 900px; margin-bottom: 15px; box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.5); position: relative; }
         .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; background: white; padding: 5px; margin-bottom: 15px; width: 100%; max-width: 900px; box-sizing: border-box; }
         
-        /* Grid */
         table { border-collapse: collapse; width: 100%; min-width: 500px; } 
         th, td { border: 1px solid #ccc; height: 40px; text-align: center; font-size: 12px; }
         .team-top { background: var(--blue); color: white; font-weight: bold; }
         .team-side { background: var(--red); color: white; width: 35px; writing-mode: vertical-rl; transform: rotate(180deg); font-weight: bold; }
         .num { background: #eee; font-weight: bold; color: #000; font-size: 1.1rem; }
 
-        /* Inputs */
         input.sq { width: 100%; height: 100%; border: none; text-align: center; background: transparent; font-size: 11px; font-weight: bold; outline: none; }
-        input:focus { background: #fffde7; }
         
-        /* Winner Animation */
+        #activity-ticker { background: #333; color: #4caf50; width: 100%; max-width: 900px; padding: 10px; text-align: center; font-size: 14px; font-weight: bold; border-radius: 8px; margin-bottom: 10px; border-left: 5px solid #4caf50; display: none; box-sizing: border-box; }
+        .ticker-anim { animation: flash 1s ease-in-out; }
+        @keyframes flash { 0% { background: #4caf50; color: white; } 100% { background: #333; color: #4caf50; } }
+
+        .counter-badge { background: var(--red); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; float: right; font-weight: bold; }
         .winner { background: #fff59d !important; animation: pulse 2s infinite; border: 2px solid var(--gold); }
         @keyframes pulse { 0%, 100% { background: #fff59d; } 50% { background: #ffd54f; } }
-
-        /* History & Admin */
-        .history-table { width: 100%; margin-top: 10px; border-top: 2px solid #eee; }
-        .history-table td { padding: 8px; font-size: 14px; }
-        .history-table b { color: var(--red); }
         
         button { padding: 10px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; color: white; transition: 0.2s; }
         button:active { transform: scale(0.95); }
         .btn-main { background: var(--blue); }
+        .btn-copy { background: #4caf50; }
         .btn-gold { background: var(--gold); }
         .btn-reset { background: #607d8b; }
 
@@ -52,24 +48,35 @@
 </head>
 <body>
 
-    <h2 id="title" style="margin: 10px 0; text-align: center;">🏈 Loading Game...</h2>
+    <h2 id="title" style="margin: 10px 0; text-align: center;">🏈 Super Bowl LIX</h2>
 
-    <div class="card" id="admin-fields" style="display:none; background: #fff3e0;">
+    <div id="activity-ticker"></div>
+
+    <div class="card" id="admin-fields" style="display:none; background: #fff3e0; border: 2px solid #ffcc80;">
         <h4 style="margin:0 0 10px 0; color: #e65100;">Commissioner Dashboard</h4>
-        <div style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px;">
-            <input type="text" id="edit-top" placeholder="Top Team" oninput="pushTeams()" style="width:47%">
-            <input type="text" id="edit-side" placeholder="Side Team" oninput="pushTeams()" style="width:47%">
-        </div>
-        <div style="font-size: 0.85rem; margin-bottom:12px; display: flex; align-items: center; gap: 10px;">
-            Price: $<input type="number" id="edit-price" style="width:50px" oninput="updatePot()">
-            Splits: <input type="text" id="payout-split" value="20,30,20,30" style="width:100px" oninput="updatePot()">
-        </div>
-        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+            <button onclick="copyShareLink()" class="btn-copy">🔗 COPY SHARE LINK</button>
             <button onclick="toggleLock()" id="lock-btn" class="btn-main">🔒 LOCK BOARD</button>
             <button onclick="pushShuffle()" class="btn-gold">🎲 SHUFFLE</button>
             <button onclick="resetNumbersOnly()" class="btn-reset">❓ HIDE NUMS</button>
             <button onclick="globalReset()" style="background: var(--red)">🧹 RESET ALL</button>
         </div>
+        <div style="display:flex; gap:10px; margin-bottom:10px;">
+            <input type="text" id="edit-top" placeholder="Top Team" oninput="pushTeams()" style="width:45%">
+            <input type="text" id="edit-side" placeholder="Side Team" oninput="pushTeams()" style="width:45%">
+        </div>
+        <div style="font-size: 13px; margin-bottom:10px;">
+            Price: $<input type="number" id="edit-price" style="width:50px" oninput="updatePot()">
+            Splits (%): <input type="text" id="payout-split" value="25,25,25,25" style="width:100px" oninput="updatePot()">
+        </div>
+        <small>Edit Rules (updates live):</small>
+        <textarea id="rules-editor" style="width:100%; height:50px; margin-top:5px;" oninput="updateRules()"></textarea>
+    </div>
+
+    <div class="card">
+        <div class="counter-badge" id="squares-left">100 Left</div>
+        <h4 style="margin:0 0 5px 0">📜 House Rules</h4>
+        <div id="rules-text" style="font-size: 14px; white-space: pre-wrap;">Loading rules...</div>
     </div>
 
     <div class="table-wrap">
@@ -81,27 +88,28 @@
 
     <div class="card">
         <h4 style="margin:0">🏆 Payout History (Pot: <span id="total-pot">$0</span>)</h4>
-        <table class="history-table">
+        <table class="history-table" style="width:100%; margin-top:10px;">
             <tr><td><b>Q1</b></td><td id="h1">Waiting...</td><td id="p1">$0</td></tr>
             <tr><td><b>Half</b></td><td id="h2">Waiting...</td><td id="p2">$0</td></tr>
             <tr><td><b>Q3</b></td><td id="h3">Waiting...</td><td id="p3">$0</td></tr>
             <tr><td><b>Final</b></td><td id="h4">Waiting...</td><td id="p4">$0</td></tr>
         </table>
         
-        <div style="margin-top:15px; border-top: 1px solid #eee; padding-top:10px; text-align:center;">
-            <b>Current Score:</b><br>
-            <span id="label-score-top">Top</span>: <input type="number" id="s-top" style="width:45px" oninput="pushScore()">
-            <span id="label-score-side">Side</span>: <input type="number" id="s-side" style="width:45px" oninput="pushScore()">
-            <br>
-            <button onclick="saveWinnerPrompt()" class="btn-main" style="margin-top:10px; font-size:12px;">💾 SAVE QUARTER WINNER</button>
+        <div style="margin-top:15px; border-top: 1px solid #eee; padding-top:15px; text-align:center;">
+            <b>Live Score Tracker:</b><br>
+            <div style="margin:10px 0;">
+                <span id="label-score-top">Top</span>: <input type="number" id="s-top" style="width:50px; padding:5px;" oninput="pushScore()">
+                <span id="label-score-side">Side</span>: <input type="number" id="s-side" style="width:50px; padding:5px;" oninput="pushScore()">
+            </div>
+            <button onclick="saveWinnerPrompt()" class="btn-main" style="font-size:12px;">💾 SAVE WINNER FOR THIS SCORE</button>
         </div>
     </div>
 
     <div class="card">
         <div id="chat-display"></div>
         <div style="display:flex; gap:5px;">
-            <input type="text" id="chat-name" placeholder="Name" style="width:70px">
-            <input type="text" id="chat-msg" placeholder="Talk smack..." style="flex-grow:1" onkeypress="if(event.key==='Enter') sendChat()">
+            <input type="text" id="chat-name" placeholder="Name" style="width:80px; padding:8px;">
+            <input type="text" id="chat-msg" placeholder="Talk smack..." style="flex-grow:1; padding:8px;" onkeypress="if(event.key==='Enter') sendChat()">
             <button onclick="sendChat()" class="btn-main">Send</button>
         </div>
     </div>
@@ -118,16 +126,14 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        
         const myID = localStorage.getItem('sq_uid') || Math.random().toString(36).slice(2);
         localStorage.setItem('sq_uid', myID);
 
         const isAdmin = new URLSearchParams(window.location.search).get('pass') === 'Number.02superbowl';
         if (isAdmin) document.getElementById('admin-fields').style.display = 'block';
 
-        let isLocked = false, cellOwnership = {}, currentNames = {};
+        let isLocked = false, cellOwnership = {};
 
-        // --- UI INITIALIZATION ---
         function initGrid() {
             const table = document.getElementById('mainTable');
             document.getElementById('top-row-label').innerHTML = `<th colspan="2" rowspan="2" style="border:none"></th><th colspan="10" class="team-top" id="label-top">TOP</th>`;
@@ -141,7 +147,15 @@
         }
         initGrid();
 
-        // --- ADMIN FUNCTIONS ---
+        function copyShareLink() {
+            const url = window.location.origin + window.location.pathname;
+            navigator.clipboard.writeText(url).then(() => alert("Share Link Copied! Password removed."));
+        }
+
+        function updateRules() {
+            if(isAdmin) db.ref('gameRules').set({ text: document.getElementById('rules-editor').value, pass: 'Number.02superbowl' });
+        }
+
         function pushTeams() { 
             if(isAdmin) db.ref('teams').set({ t: document.getElementById('edit-top').value, s: document.getElementById('edit-side').value, pass: 'Number.02superbowl' }); 
         }
@@ -152,36 +166,27 @@
             db.ref('nums').set({ t: r(), s: r(), pass: 'Number.02superbowl' });
         }
 
-        function resetNumbersOnly() {
-            if (isAdmin && confirm("Hide numbers?")) {
-                db.ref('nums').set({ t: null, s: null, pass: 'Number.02superbowl' });
-            }
-        }
+        function resetNumbersOnly() { if (isAdmin && confirm("Hide numbers?")) db.ref('nums').set({ t: null, s: null, pass: 'Number.02superbowl' }); }
 
-        function globalReset() {
-            if (isAdmin && confirm("WIPE ENTIRE DATABASE?")) {
-                db.ref('/').set({ pass: 'Number.02superbowl' });
-                location.reload();
-            }
-        }
+        function globalReset() { if (isAdmin && confirm("WIPE ALL DATA?")) { db.ref('/').set({ pass: 'Number.02superbowl' }); location.reload(); } }
 
         function toggleLock() { if(isAdmin) db.ref('isLocked').set(!isLocked); }
 
         function saveWinnerPrompt() {
-            const q = prompt("Enter Quarter (1, 2, 3, or 4 for Final):");
-            if(!q || !["1","2","3","4"].includes(q)) return;
+            const q = prompt("Which Quarter? (1, 2, 3, or 4 for Final)");
+            if(!["1","2","3","4"].includes(q)) return;
             const winnerCell = document.querySelector('.winner input');
             const winnerName = winnerCell ? winnerCell.value : "Empty Square";
             const score = `${document.getElementById('s-top').value}-${document.getElementById('s-side').value}`;
             db.ref('history/'+q).set({ name: winnerName, score: score });
         }
 
-        // --- USER FUNCTIONS ---
         function claimSquare(id, val) {
             if(isLocked && !isAdmin) return;
             if(!cellOwnership[id] || cellOwnership[id] === myID || isAdmin) {
                 db.ref('names/'+id).set(val);
                 db.ref('owners/'+id).set(myID);
+                if(val.trim() !== "") db.ref('lastAction').set({ msg: `🔥 ${val} grabbed a square!`, time: Date.now() });
             }
         }
 
@@ -193,7 +198,6 @@
             document.getElementById('chat-msg').value = '';
         }
 
-        // --- REALTIME SYNC ---
         db.ref('isLocked').on('value', s => { 
             isLocked = s.val() || false;
             document.getElementById('lock-btn').innerText = isLocked ? "🔓 UNLOCK" : "🔒 LOCK";
@@ -204,19 +208,35 @@
             });
         });
 
+        db.ref('gameRules/text').on('value', s => {
+            const val = s.val() || "Click a square to enter your name!";
+            document.getElementById('rules-text').innerText = val;
+            if(isAdmin) document.getElementById('rules-editor').value = val;
+        });
+
+        db.ref('lastAction').on('value', s => {
+            const data = s.val();
+            if(!data) return;
+            const ticker = document.getElementById('activity-ticker');
+            ticker.innerText = data.msg; ticker.style.display = 'block';
+            ticker.classList.remove('ticker-anim'); void ticker.offsetWidth; ticker.classList.add('ticker-anim');
+        });
+
         db.ref('names').on('value', s => { 
-            currentNames = s.val() || {}; 
-            document.querySelectorAll('.sq').forEach(i => i.value = currentNames[i.id.replace('q','')] || ''); 
+            const names = s.val() || {}; 
+            document.querySelectorAll('.sq').forEach(i => i.value = names[i.id.replace('q','')] || ''); 
+            const remaining = 100 - Object.keys(names).filter(k => names[k].trim() !== "").length;
+            const b = document.getElementById('squares-left');
+            b.innerText = remaining + " Left";
+            b.style.background = remaining <= 10 ? "#f39c12" : (remaining === 0 ? "#4caf50" : "#C60C30");
         });
 
         db.ref('owners').on('value', s => { cellOwnership = s.val() || {}; });
 
         db.ref('teams').on('value', s => { 
             const t = s.val() || {t:'Top Team', s:'Side Team'};
-            document.getElementById('label-top').innerText = t.t;
-            document.getElementById('label-side').innerText = t.s;
-            document.getElementById('label-score-top').innerText = t.t;
-            document.getElementById('label-score-side').innerText = t.s;
+            document.getElementById('label-top').innerText = t.t; document.getElementById('label-side').innerText = t.s;
+            document.getElementById('label-score-top').innerText = t.t; document.getElementById('label-score-side').innerText = t.s;
             document.getElementById('title').innerText = t.t + ' vs ' + t.s;
         });
 
@@ -234,21 +254,17 @@
 
         db.ref('score').on('value', s => { 
             const sc = s.val() || {t:0, s:0};
-            document.getElementById('s-top').value = sc.t;
-            document.getElementById('s-side').value = sc.s;
+            document.getElementById('s-top').value = sc.t; document.getElementById('s-side').value = sc.s;
             refreshWin();
         });
 
         db.ref('history').on('value', s => { 
             const h = s.val() || {};
-            for(let i=1; i<=4; i++) {
-                if(h[i]) document.getElementById('h'+i).innerHTML = `<b>${h[i].name}</b> (${h[i].score})`;
-            }
+            for(let i=1; i<=4; i++) if(h[i]) document.getElementById('h'+i).innerHTML = `<b>${h[i].name}</b> (${h[i].score})`;
         });
 
         function updatePot() {
-            const price = parseFloat(document.getElementById('edit-price').value) || 0;
-            const total = price * 100;
+            const total = (parseFloat(document.getElementById('edit-price').value) || 0) * 100;
             const perc = (document.getElementById('payout-split').value || "25,25,25,25").split(',').map(Number);
             document.getElementById('total-pot').innerText = '$' + total;
             perc.forEach((p, i) => document.getElementById('p'+(i+1)).innerText = '$' + ((p/100)*total).toFixed(0));
@@ -261,9 +277,8 @@
         });
 
         function refreshWin() {
-            const tVal = document.getElementById('s-top').value || "";
-            const sVal = document.getElementById('s-side').value || "";
-            const tD = tVal.toString().slice(-1), sD = sVal.toString().slice(-1);
+            const tD = (document.getElementById('s-top').value || "").toString().slice(-1);
+            const sD = (document.getElementById('s-side').value || "").toString().slice(-1);
             document.querySelectorAll('td').forEach(td => td.classList.remove('winner'));
             if(tD === "" || sD === "") return;
             const tI = Array.from(document.querySelectorAll('.t-n')).findIndex(e => e.innerText == tD);
