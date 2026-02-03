@@ -11,21 +11,26 @@
         :root { --blue: #002244; --red: #C60C30; --gold: #f39c12; --bg: #121212; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: #fff; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
         
-        .card { background: white; color: #333; padding: 15px; border-radius: 12px; width: 100%; max-width: 900px; margin-bottom: 15px; box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .card { background: white; color: #333; padding: 15px; border-radius: 12px; width: 100%; max-width: 900px; margin-bottom: 15px; box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.5); overflow: hidden; }
         
-        /* THE FIX: Table Wrapper for scrolling */
+        /* Grid and Payout Table Wrappers */
         .table-wrap { 
-            width: 100vw; 
-            margin-left: -10px; /* Offset body padding to go edge-to-edge */
+            width: 100%; 
             overflow-x: auto; 
-            padding: 10px;
-            box-sizing: border-box;
             -webkit-overflow-scrolling: touch; 
+            margin-bottom: 10px;
+            border-radius: 8px;
         }
         
-        table { border-collapse: collapse; margin: 0 auto; background: white; min-width: 600px; } 
-        th, td { border: 1px solid #ccc; height: 45px; text-align: center; }
-        .team-top { background: var(--blue); color: white; font-weight: bold; font-size: 14px; padding: 5px; }
+        /* Main Grid Table */
+        #mainTable { border-collapse: collapse; margin: 0 auto; background: white; min-width: 600px; } 
+        #mainTable th, #mainTable td { border: 1px solid #ccc; height: 45px; text-align: center; }
+        
+        /* Payout Table */
+        .payout-table { width: 100%; min-width: 300px; border-collapse: collapse; }
+        .payout-table td { padding: 10px 5px; border-bottom: 1px solid #eee; font-size: 14px; }
+
+        .team-top { background: var(--blue); color: white; font-weight: bold; font-size: 14px; }
         .team-side { background: var(--red); color: white; width: 30px; writing-mode: vertical-rl; transform: rotate(180deg); font-weight: bold; font-size: 14px; }
         .num { background: #eee; font-weight: bold; color: #000; font-size: 1.2rem; width: 40px; }
 
@@ -39,21 +44,18 @@
         .winner { background: #fff59d !important; animation: pulse 2s infinite; border: 2px solid var(--gold); }
         @keyframes pulse { 0%, 100% { background: #fff59d; } 50% { background: #ffd54f; } }
         
-        button { padding: 10px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; color: white; transition: 0.2s; }
+        button { padding: 10px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; color: white; }
         .btn-main { background: var(--blue); }
-        .btn-share { background: #2196F3; font-size: 14px; margin-top: 10px; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .btn-share { background: #2196F3; font-size: 14px; margin-top: 10px; width: 100%; }
         .btn-gold { background: var(--gold); }
         .btn-reset { background: #607d8b; }
 
         #chat-display { height: 100px; overflow-y: auto; font-size: 13px; border: 1px solid #ddd; padding: 10px; margin-bottom: 8px; background: #fafafa; border-radius: 4px; }
         
-        /* PORTRAIT OPTIMIZATIONS */
         @media (max-width: 600px) {
-            h2 { font-size: 1.2rem; }
             .team-side { width: 20px; font-size: 10px; }
-            th, td { height: 40px; }
+            #mainTable th, #mainTable td { height: 40px; }
             .num { font-size: 1rem; width: 30px; }
-            input.sq { font-size: 10px; }
         }
     </style>
 </head>
@@ -94,21 +96,22 @@
             <tr id="top-row-label"></tr>
             <tr id="top-nums"></tr>
         </table>
-        <div style="text-align: center; font-size: 10px; color: #888; margin-top: 5px;" class="mobile-hint">↔ Swipe to see full board</div>
     </div>
 
     <div class="card">
         <h4 style="margin:0">🏆 Payouts (Pot: <span id="total-pot">$0</span>)</h4>
-        <table style="width:100%; margin-top:10px; color: #333; font-size: 14px;">
-            <tr><td><b>Q1</b></td><td id="h1">Waiting...</td><td id="p1">$0</td></tr>
-            <tr><td><b>Half</b></td><td id="h2">Waiting...</td><td id="p2">$0</td></tr>
-            <tr><td><b>Q3</b></td><td id="h3">Waiting...</td><td id="p3">$0</td></tr>
-            <tr><td><b>Final</b></td><td id="h4">Waiting...</td><td id="p4">$0</td></tr>
-        </table>
-        <div style="margin-top:15px; border-top: 1px solid #eee; padding-top:10px; text-align:center;">
-            <b>Live Score Tracker:</b><br>
-            <span id="label-score-top">Top</span>: <input type="number" id="s-top" style="width:45px" oninput="pushScore()">
-            <span id="label-score-side">Side</span>: <input type="number" id="s-side" style="width:45px" oninput="pushScore()">
+        <div class="table-wrap">
+            <table class="payout-table">
+                <tr><td><b>Q1</b></td><td id="h1">Waiting...</td><td id="p1">$0</td></tr>
+                <tr><td><b>Half</b></td><td id="h2">Waiting...</td><td id="p2">$0</td></tr>
+                <tr><td><b>Q3</b></td><td id="h3">Waiting...</td><td id="p3">$0</td></tr>
+                <tr><td><b>Final</b></td><td id="h4">Waiting...</td><td id="p4">$0</td></tr>
+            </table>
+        </div>
+        <div style="margin-top:5px; border-top: 1px solid #eee; padding-top:10px; text-align:center;">
+            <small><b>Live Score Tracker:</b></small><br>
+            <span id="label-score-top" style="font-size:12px">Top</span>: <input type="number" id="s-top" style="width:40px" oninput="pushScore()">
+            <span id="label-score-side" style="font-size:12px">Side</span>: <input type="number" id="s-side" style="width:40px" oninput="pushScore()">
             <br><button onclick="saveWinnerPrompt()" class="btn-main" style="font-size:11px; margin-top:8px;">💾 SAVE WINNER</button>
         </div>
     </div>
@@ -123,6 +126,7 @@
     </div>
 
     <script>
+        // --- CONFIG ---
         const firebaseConfig = {
             apiKey: "AIzaSyAyUTAJvlOYwwkQDbn4aIv2T45j8v4cA1g",
             authDomain: "super-bowl-2026-c3939.firebaseapp.com",
@@ -157,7 +161,7 @@
 
         function copyShareLink() {
             const url = window.location.origin + window.location.pathname;
-            navigator.clipboard.writeText(url).then(() => alert("Link Copied! Admin password hidden."));
+            navigator.clipboard.writeText(url).then(() => alert("Link Copied!"));
         }
 
         function updateRules() { if(isAdmin) db.ref('gameRules').set({ text: document.getElementById('rules-editor').value, pass: 'Number.02superbowl' }); }
