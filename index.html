@@ -3,35 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Super Bowl 2026 Squares</title>
+    <title id="tab-title">Super Bowl Squares</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     
     <style>
-        :root { --blue: #002244; --red: #C60C30; --gold: #f39c12; --bg: #121212; }
+        :root { 
+            --blue: #002244; /* Top Team Color */
+            --red: #C60C30;  /* Side Team Color */
+            --gold: #f39c12; 
+            --bg: #121212; 
+        }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: #fff; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
         
         .card { background: white; color: #333; padding: 15px; border-radius: 12px; width: 100%; max-width: 900px; margin-bottom: 15px; box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.5); overflow: hidden; }
         
-        /* Grid and Payout Table Wrappers */
-        .table-wrap { 
-            width: 100%; 
-            overflow-x: auto; 
-            -webkit-overflow-scrolling: touch; 
-            margin-bottom: 10px;
-            border-radius: 8px;
-        }
+        .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 10px; border-radius: 8px; }
         
-        /* Main Grid Table */
         #mainTable { border-collapse: collapse; margin: 0 auto; background: white; min-width: 600px; } 
         #mainTable th, #mainTable td { border: 1px solid #ccc; height: 45px; text-align: center; }
         
-        /* Payout Table */
         .payout-table { width: 100%; min-width: 300px; border-collapse: collapse; }
         .payout-table td { padding: 10px 5px; border-bottom: 1px solid #eee; font-size: 14px; }
 
-        .team-top { background: var(--blue); color: white; font-weight: bold; font-size: 14px; }
-        .team-side { background: var(--red); color: white; width: 30px; writing-mode: vertical-rl; transform: rotate(180deg); font-weight: bold; font-size: 14px; }
+        .team-top { background: var(--blue); color: white; font-weight: bold; font-size: 14px; transition: 0.3s; }
+        .team-side { background: var(--red); color: white; width: 30px; writing-mode: vertical-rl; transform: rotate(180deg); font-weight: bold; font-size: 14px; transition: 0.3s; }
         .num { background: #eee; font-weight: bold; color: #000; font-size: 1.2rem; width: 40px; }
 
         input.sq { width: 100%; height: 100%; border: none; text-align: center; background: transparent; font-size: 12px; font-weight: bold; outline: none; color: #333; }
@@ -49,6 +45,7 @@
         .btn-share { background: #2196F3; font-size: 14px; margin-top: 10px; width: 100%; }
         .btn-gold { background: var(--gold); }
         .btn-reset { background: #607d8b; }
+        .color-label { font-size: 11px; color: #666; font-weight: normal; display: block; }
 
         #chat-display { height: 100px; overflow-y: auto; font-size: 13px; border: 1px solid #ddd; padding: 10px; margin-bottom: 8px; background: #fafafa; border-radius: 4px; }
         
@@ -61,22 +58,42 @@
 </head>
 <body>
 
-    <h2 id="title">🏈 Super Bowl LIX</h2>
+    <h2 id="header-display">🏈 Super Bowl LIX</h2>
 
     <div id="activity-ticker"></div>
 
     <div class="card" id="admin-fields" style="display:none; background: #fff3e0; border: 2px solid #ffcc80;">
         <h4 style="margin:0 0 10px 0; color: #e65100;">Commissioner Dashboard</h4>
+        
+        <div style="margin-bottom:15px;">
+            <label class="color-label">Display Header Title:</label>
+            <input type="text" id="edit-header" placeholder="e.g. Super Bowl 2026" oninput="pushHeader()" style="width:100%; padding:8px; box-sizing:border-box;">
+        </div>
+
         <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
             <button onclick="toggleLock()" id="lock-btn" class="btn-main">🔒 LOCK BOARD</button>
             <button onclick="pushShuffle()" class="btn-gold">🎲 SHUFFLE</button>
             <button onclick="resetNumbersOnly()" class="btn-reset">❓ HIDE NUMS</button>
             <button onclick="globalReset()" style="background: var(--red)">🧹 RESET ALL</button>
         </div>
-        <div style="display:flex; gap:10px; margin-bottom:10px;">
-            <input type="text" id="edit-top" placeholder="Top Team" oninput="pushTeams()" style="width:45%">
-            <input type="text" id="edit-side" placeholder="Side Team" oninput="pushTeams()" style="width:45%">
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+            <div>
+                <label class="color-label">Top Team / Color:</label>
+                <div style="display:flex; gap:5px;">
+                    <input type="text" id="edit-top" placeholder="Top Name" oninput="pushTeams()" style="width:70%">
+                    <input type="color" id="color-top" value="#002244" oninput="pushTeams()" style="width:30%; height:35px; border:none; padding:0;">
+                </div>
+            </div>
+            <div>
+                <label class="color-label">Side Team / Color:</label>
+                <div style="display:flex; gap:5px;">
+                    <input type="text" id="edit-side" placeholder="Side Name" oninput="pushTeams()" style="width:70%">
+                    <input type="color" id="color-side" value="#C60C30" oninput="pushTeams()" style="width:30%; height:35px; border:none; padding:0;">
+                </div>
+            </div>
         </div>
+
         <div style="font-size: 13px;">
             Price: $<input type="number" id="edit-price" style="width:50px" oninput="updatePot()">
             Splits (%): <input type="text" id="payout-split" value="25,25,25,25" style="width:90px" oninput="updatePot()">
@@ -110,8 +127,8 @@
         </div>
         <div style="margin-top:5px; border-top: 1px solid #eee; padding-top:10px; text-align:center;">
             <small><b>Live Score Tracker:</b></small><br>
-            <span id="label-score-top" style="font-size:12px">Top</span>: <input type="number" id="s-top" style="width:40px" oninput="pushScore()">
-            <span id="label-score-side" style="font-size:12px">Side</span>: <input type="number" id="s-side" style="width:40px" oninput="pushScore()">
+            <span id="label-score-top" style="font-size:12px; font-weight:bold; color:var(--blue)">Top</span>: <input type="number" id="s-top" style="width:40px" oninput="pushScore()">
+            <span id="label-score-side" style="font-size:12px; font-weight:bold; color:var(--red)">Side</span>: <input type="number" id="s-side" style="width:40px" oninput="pushScore()">
             <br><button onclick="saveWinnerPrompt()" class="btn-main" style="font-size:11px; margin-top:8px;">💾 SAVE WINNER</button>
         </div>
     </div>
@@ -126,7 +143,7 @@
     </div>
 
     <script>
-        // --- CONFIG ---
+        // --- FIREBASE CONFIG ---
         const firebaseConfig = {
             apiKey: "AIzaSyAyUTAJvlOYwwkQDbn4aIv2T45j8v4cA1g",
             authDomain: "super-bowl-2026-c3939.firebaseapp.com",
@@ -159,14 +176,27 @@
         }
         initGrid();
 
+        // Admin Pushers
+        function pushHeader() { if(isAdmin) db.ref('header').set(document.getElementById('edit-header').value); }
+        
+        function pushTeams() {
+            if(!isAdmin) return;
+            const data = {
+                t: document.getElementById('edit-top').value,
+                s: document.getElementById('edit-side').value,
+                cT: document.getElementById('color-top').value,
+                cS: document.getElementById('color-side').value,
+                pass: 'Number.02superbowl'
+            };
+            db.ref('teams').set(data);
+        }
+
         function copyShareLink() {
             const url = window.location.origin + window.location.pathname;
             navigator.clipboard.writeText(url).then(() => alert("Link Copied!"));
         }
 
         function updateRules() { if(isAdmin) db.ref('gameRules').set({ text: document.getElementById('rules-editor').value, pass: 'Number.02superbowl' }); }
-
-        function pushTeams() { if(isAdmin) db.ref('teams').set({ t: document.getElementById('edit-top').value, s: document.getElementById('edit-side').value, pass: 'Number.02superbowl' }); }
 
         function pushShuffle() {
             if(!isAdmin) return;
@@ -206,6 +236,14 @@
             document.getElementById('chat-msg').value = '';
         }
 
+        // --- LISTENERS ---
+        db.ref('header').on('value', s => {
+            const val = s.val() || "🏈 Super Bowl LIX";
+            document.getElementById('header-display').innerText = val;
+            document.getElementById('tab-title').innerText = val;
+            if(isAdmin) document.getElementById('edit-header').value = val;
+        });
+
         db.ref('isLocked').on('value', s => { 
             isLocked = s.val() || false;
             document.getElementById('lock-btn').innerText = isLocked ? "🔓 UNLOCK" : "🔒 LOCK";
@@ -241,10 +279,24 @@
         db.ref('owners').on('value', s => { cellOwnership = s.val() || {}; });
 
         db.ref('teams').on('value', s => { 
-            const t = s.val() || {t:'Top Team', s:'Side Team'};
-            document.getElementById('label-top').innerText = t.t; document.getElementById('label-side').innerText = t.s;
-            document.getElementById('label-score-top').innerText = t.t; document.getElementById('label-score-side').innerText = t.s;
-            document.getElementById('title').innerText = t.t + ' vs ' + t.s;
+            const t = s.val() || {t:'Top Team', s:'Side Team', cT:'#002244', cS:'#C60C30'};
+            
+            // Update Text
+            document.getElementById('label-top').innerText = t.t;
+            document.getElementById('label-side').innerText = t.s;
+            document.getElementById('label-score-top').innerText = t.t;
+            document.getElementById('label-score-side').innerText = t.s;
+            
+            // Update CSS Variables (Colors)
+            document.documentElement.style.setProperty('--blue', t.cT);
+            document.documentElement.style.setProperty('--red', t.cS);
+
+            if(isAdmin) {
+                document.getElementById('edit-top').value = t.t;
+                document.getElementById('edit-side').value = t.s;
+                document.getElementById('color-top').value = t.cT;
+                document.getElementById('color-side').value = t.cS;
+            }
         });
 
         db.ref('nums').on('value', s => { 
