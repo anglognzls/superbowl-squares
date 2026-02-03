@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Live Super Bowl Squares</title>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    
+    <style>
+        :root { --blue: #002244; --red: #C60C30; }
+        body { font-family: "Arial Black", sans-serif; background: #222; color: #333; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .controls, .payouts { background: white; padding: 20px; border-radius: 8px; width: 900px; margin-bottom: 20px; text-align: center; }
+        .table-wrap { background: white; padding: 15px; border: 3px solid black; }
+        table { border-collapse: collapse; table-layout: fixed; width: 860px; } 
+        th, td { border: 2px solid black; height: 75px; text-align: center; vertical-align: middle; }
+        .team-top { background: var(--blue); color: white; font-size: 1.5rem; height: 50px; }
+        .team-side { background: var(--red); color: white; font-size: 1.5rem; line-height: 1.1; width: 50px; }
+        .num { background: #ddd; font-size: 1.8rem; font-weight: bold; }
+        input.sq { width: 100%; height: 100%; border: none; text-align: center; font-size: 13px; background: transparent; outline: none; }
+        .winner { background: #ffeb3b !important; }
+        button { padding: 10px 15px; margin: 5px; font-weight: bold; cursor: pointer; border: none; border-radius: 4px; background: var(--blue); color: white; }
+        @media print { .controls, button, .team-edit-box { display: none !important; } }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <h2 id="title">🏈 Seahawks vs Patriots</h2>
+        <div class="team-edit-box" style="margin-bottom:10px;">
+            Top: <input type="text" id="edit-top" value="Seahawks" oninput="pushTeams()" style="width:80px"> 
+            Side: <input type="text" id="edit-side" value="Patriots" oninput="pushTeams()" style="width:80px">
+        </div>
+        <button onclick="pushShuffle()">🎲 RANDOMIZE NUMBERS</button>
+        <button onclick="window.print()" style="background:#444;">🖨️ PRINT PDF</button>
+        <br><br>
+        Score -> Top: <input type="number" id="s-top" style="width:40px"> Side: <input type="number" id="s-side" style="width:40px">
+        <button onclick="findWin()" style="background:green;">🏆 HIGHLIGHT WINNER</button>
+    </div>
+
+    <div class="table-wrap">
+        <table id="mainTable">
+            <colgroup><col style="width:50px;"><col style="width:50px;"><col span="10" style="width:76px;"></colgroup>
+            <tr>
+                <th colspan="2" rowspan="2" style="border:none"></th>
+                <th colspan="10" class="team-top" id="label-top">SEAHAWKS</th>
+            </tr>
+            <tr id="top-nums"></tr>
+            </table>
+    </div>
+
+    <script>
+        // 2. PASTE YOUR UNIQUE FIREBASE CONFIG HERE
+        const firebaseConfig = {
+		apiKey: "AIzaSyAyUTAJvlOYwwkQDbn4aIv2T45j8v4cA1g",
+ 		authDomain: "super-bowl-2026-c3939.firebaseapp.com",
+  		projectId: "super-bowl-2026-c3939",
+  		storageBucket: "super-bowl-2026-c3939.firebasestorage.app",
+  		messagingSenderId: "262096718545",
+  		appId: "1:262096718545:web:497ce0377c36f0333653f0",
+  		measurementId: "G-C5CRV8X0CX"	
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // 3. GENERATE THE GRID
+        const table = document.getElementById('mainTable');
+        for(let r=0; r<10; r++) {
+            let row = document.createElement('tr');
+            if(r === 0) {
+                row.innerHTML = `<th rowspan="10" class="team-side" id="label-side">P<br>A<br>T<br>R<br>I<br>O<br>T<br>S</th>`;
+            }
+            row.innerHTML += `<th class="num s-n" id="sn-${r}">?</th>`;
+            for(let c=0; c<10; c++) {
+                row.innerHTML += `<td><input class="sq" id="q${r}${c}" oninput="pushName('${r}${c}', this.value)"></td>`;
+            }
+            table.appendChild(row);
+        }
+
+        // 4. LIVE UPDATE FUNCTIONS
+        function pushName(id, val) { db.ref('names/' + id).set(val); }
+        function pushTeams() {
+            db.ref('teams').set({ top: document.getElementById('edit-top').value, side: document.getElementById('edit-side').value });
+        }
+        function pushShuffle() {
+            const gen = () => [0,1,2,3,4,5,6,7,8,9].sort(() => Math.random() - 0.5);
+            db.ref('numbers').set({ top: gen(), side: gen() });
+        }
+
+        // 5. LISTEN FOR CHANGES (The "Live" Part)
+        db.ref('names').on('value', (snap) => {
+            const names = snap.val() || {};
+            Object.keys(names).forEach(id => { document.getElementById('q'+id).value = names[id]; });
+        });
+        db.ref('teams').on('value', (snap) => {
+            const teams = snap.val() || {top: 'Seahawks', side: 'Patriots'};
+            document.getElementById('label-top').innerText = teams.top.toUpperCase();
+            document.getElementById('label-side').innerHTML = teams.side.toUpperCase().split('').join('<br>');
+            document.getElementById('title').innerText = `🏈 ${teams.top} vs ${teams.side}`;
+        });
+        db.ref('numbers').on('value', (snap) => {
+            const nums = snap.val();
+            if(!nums) return;
+            const topRow = document.getElementById('top-nums');
+            topRow.innerHTML = nums.top.map(n => `<th class="num t-n">${n}</th>`).join('');
+            nums.side.forEach((n, i) => { document.getElementById(`sn-${i}`).innerText = n; });
+        });
+
+        function findWin() {
+            const tD = document.getElementById('s-top').value.slice(-1);
+            const sD = document.getElementById('s-side').value.slice(-1);
+            document.querySelectorAll('td').forEach(td => td.classList.remove("winner"));
+            let tIdx = Array.from(document.querySelectorAll('.t-n')).findIndex(el => el.innerText == tD);
+            let sIdx = Array.from(document.querySelectorAll('.s-n')).findIndex(el => el.innerText == sD);
+            if (tIdx > -1 && sIdx > -1) document.getElementById(`q${sIdx}${tIdx}`).parentElement.classList.add("winner");
+        }
+    </script>
+</body>
+</html>
