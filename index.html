@@ -2,15 +2,15 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Live Super Bowl Squares</title>
+    <title>2026 Live Super Bowl Squares & Chat</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     
     <style>
         :root { --blue: #002244; --red: #C60C30; }
         body { font-family: "Arial Black", sans-serif; background: #222; color: #333; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .controls { background: white; padding: 20px; border-radius: 8px; width: 900px; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .table-wrap { background: white; padding: 15px; border: 3px solid black; }
+        .controls, .info-box, .chat-box { background: white; padding: 20px; border-radius: 8px; width: 900px; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); box-sizing: border-box; }
+        .table-wrap { background: white; padding: 15px; border: 3px solid black; margin-bottom: 20px; }
         table { border-collapse: collapse; table-layout: fixed; width: 860px; } 
         th, td { border: 2px solid black; height: 75px; text-align: center; vertical-align: middle; }
         .team-top { background: var(--blue); color: white; font-size: 1.5rem; height: 50px; }
@@ -18,44 +18,61 @@
         .num { background: #ddd; font-size: 1.8rem; font-weight: bold; }
         input.sq { width: 100%; height: 100%; border: none; text-align: center; font-size: 13px; background: transparent; outline: none; }
         .winner { background: #ffeb3b !important; box-shadow: inset 0 0 15px rgba(0,0,0,0.2); }
-        
         button { padding: 10px 15px; margin: 5px; font-weight: bold; cursor: pointer; border: none; border-radius: 4px; background: var(--blue); color: white; }
+        .admin-only { display: none; background: #f9f9f9; padding: 15px; border: 1px dashed #ccc; margin-bottom: 10px; }
         
-        /* HIDE ADMIN CONTROLS BY DEFAULT */
-        .admin-only { display: none; }
+        /* CHAT STYLING */
+        #chat-display { height: 150px; overflow-y: auto; border: 1px solid #ddd; text-align: left; padding: 10px; margin-bottom: 10px; background: #fdfdfd; font-family: sans-serif; font-size: 0.9rem; }
+        .msg { margin-bottom: 5px; border-bottom: 1px solid #f0f0f0; padding-bottom: 2px; }
+        .msg b { color: var(--blue); }
         
-        @media print { .controls, button { display: none !important; } }
+        .payout-grid { display: flex; justify-content: space-around; margin-top: 15px; }
+        .payout-item { border: 2px solid #eee; padding: 10px; border-radius: 5px; width: 22%; }
+        @media print { .controls, button, .admin-only, .chat-box { display: none !important; } }
     </style>
 </head>
 <body>
 
     <div class="controls">
-        <h2 id="title">🏈 Loading Teams...</h2>
-        
-        <div class="admin-only" id="admin-fields" style="margin-bottom:10px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
-            <p style="font-size: 0.8rem; color: #666; margin: 0 0 5px 0;">ADMIN MODE ACTIVE</p>
-            Top Team: <input type="text" id="edit-top" oninput="pushTeams()" style="width:100px"> 
-            Side Team: <input type="text" id="edit-side" oninput="pushTeams()" style="width:100px">
-            <br>
-            <button onclick="pushShuffle()" style="background:#f39c12;">🎲 RANDOMIZE NUMBERS</button>
-            <button onclick="globalReset()" style="background:#C60C30;">⚠️ RESET EVERYTHING</button>
+        <h2 id="title">🏈 Seahawks vs Patriots</h2>
+        <div class="admin-only" id="admin-fields">
+            <strong>ADMIN CONTROL PANEL</strong><br>
+            Top: <input type="text" id="edit-top" oninput="pushTeams()" style="width:80px"> 
+            Side: <input type="text" id="edit-side" oninput="pushTeams()" style="width:80px">
+            Price: $<input type="number" id="edit-price" value="10" oninput="pushPrice()" style="width:50px">
+            <button onclick="pushShuffle()" style="background:#f39c12;">🎲 RANDOM NUMS</button>
+            <button onclick="globalReset()" style="background:#C60C30;">⚠️ RESET BOARD</button>
         </div>
-
         <button onclick="window.print()" style="background:#444;">🖨️ PRINT PDF</button>
         <br><br>
-        Score -> Top: <input type="number" id="s-top" style="width:40px"> Side: <input type="number" id="s-side" style="width:40px">
-        <button onclick="pushWinner()" style="background:green;">🏆 HIGHLIGHT FOR EVERYONE</button>
+        Live Score -> Top: <input type="number" id="s-top" style="width:40px"> Side: <input type="number" id="s-side" style="width:40px">
+        <button onclick="pushWinner()" style="background:green;">🏆 UPDATE WINNER</button>
     </div>
 
     <div class="table-wrap">
         <table id="mainTable">
             <colgroup><col style="width:50px;"><col style="width:50px;"><col span="10" style="width:76px;"></colgroup>
-            <tr>
-                <th colspan="2" rowspan="2" style="border:none"></th>
-                <th colspan="10" class="team-top" id="label-top">TOP TEAM</th>
-            </tr>
+            <tr><th colspan="2" rowspan="2" style="border:none"></th><th colspan="10" class="team-top" id="label-top">TOP</th></tr>
             <tr id="top-nums"></tr>
         </table>
+    </div>
+
+    <div class="info-box">
+        <h3>💰 Payouts (25% Per Quarter)</h3>
+        <div class="payout-grid">
+            <div class="payout-item"><strong>Q1</strong><br><span id="p1">$0</span></div>
+            <div class="payout-item"><strong>Halftime</strong><br><span id="p2">$0</span></div>
+            <div class="payout-item"><strong>Q3</strong><br><span id="p3">$0</span></div>
+            <div class="payout-item"><strong>Final</strong><br><span id="p4">$0</span></div>
+        </div>
+    </div>
+
+    <div class="chat-box">
+        <h3>💬 Live Trash Talk</h3>
+        <div id="chat-display"></div>
+        <input type="text" id="chat-name" placeholder="Your Name" style="width: 20%;">
+        <input type="text" id="chat-msg" placeholder="Say something..." style="width: 60%;" onkeypress="if(event.key==='Enter') sendChat()">
+        <button onclick="sendChat()">Send</button>
     </div>
 
     <script>
@@ -73,93 +90,92 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // CHECK FOR ADMIN MODE
+        // ADMIN CHECK (URL needs ?pass=squares2026)
         const urlParams = new URLSearchParams(window.location.search);
-        const isAdmin = urlParams.get('pass') === 'Number.02superbowl';
-        if (isAdmin) {
-            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
-        }
+        const isAdmin = urlParams.get('pass') === 'squares2026';
+        if (isAdmin) document.getElementById('admin-fields').style.display = 'block';
 
-        // GENERATE GRID
+        // GRID GEN
         const table = document.getElementById('mainTable');
         for(let r=0; r<10; r++) {
             let row = document.createElement('tr');
             if(r === 0) row.innerHTML = `<th rowspan="10" class="team-side" id="label-side">SIDE</th>`;
             row.innerHTML += `<th class="num s-n" id="sn-${r}">?</th>`;
             for(let c=0; c<10; c++) {
-                // If not admin, the inputs are read-only
-                const readOnly = isAdmin ? '' : 'readonly';
-                row.innerHTML += `<td><input class="sq" id="q${r}${c}" ${readOnly} oninput="pushName('${r}${c}', this.value)"></td>`;
+                row.innerHTML += `<td><input class="sq" id="q${r}${c}" ${isAdmin?'':'readonly'} oninput="pushName('${r}${c}', this.value)"></td>`;
             }
             table.appendChild(row);
         }
 
-        // CLOUD PUSHERS
-        function pushName(id, val) { if(isAdmin) db.ref('names/' + id).set(val); }
-        function pushTeams() {
-            if(isAdmin) db.ref('teams').set({ top: document.getElementById('edit-top').value, side: document.getElementById('edit-side').value });
-        }
+        // FIREBASE PUSHERS
+        function pushName(id, val) { if(isAdmin) db.ref('names/'+id).set(val); }
+        function pushTeams() { if(isAdmin) db.ref('teams').set({t:document.getElementById('edit-top').value, s:document.getElementById('edit-side').value}); }
+        function pushPrice() { if(isAdmin) db.ref('price').set(document.getElementById('edit-price').value); }
+        function pushWinner() { db.ref('score').set({t:document.getElementById('s-top').value, s:document.getElementById('s-side').value}); }
         function pushShuffle() {
             if(!isAdmin) return;
-            const gen = () => [0,1,2,3,4,5,6,7,8,9].sort(() => Math.random() - 0.5);
-            db.ref('numbers').set({ top: gen(), side: gen() });
+            const r = () => [0,1,2,3,4,5,6,7,8,9].sort(() => Math.random()-0.5);
+            db.ref('nums').set({t:r(), s:r()});
         }
-        function pushWinner() {
-            db.ref('currentScore').set({ top: document.getElementById('s-top').value, side: document.getElementById('s-side').value });
-        }
-        function globalReset() {
-            if(isAdmin && confirm("This will wipe all names and numbers for EVERYONE. Are you sure?")) {
-                db.ref('/').update({ 'names': null, 'numbers': null, 'currentScore': null });
-                location.reload(); 
-            }
+        function globalReset() { if(isAdmin && confirm("Clear all?")) db.ref('/').set(null); }
+        
+        // CHAT PUSHER
+        function sendChat() {
+            const name = document.getElementById('chat-name').value || "Anonymous";
+            const msg = document.getElementById('chat-msg').value;
+            if(!msg) return;
+            db.ref('chat').push({ name, msg, time: Date.now() });
+            document.getElementById('chat-msg').value = '';
         }
 
-        // CLOUD LISTENERS
-        db.ref('names').on('value', snap => {
-            const names = snap.val() || {};
-            document.querySelectorAll('.sq').forEach(input => {
-                const id = input.id.replace('q', '');
-                input.value = names[id] || '';
+        // LISTENERS
+        db.ref('names').on('value', s => {
+            const n = s.val() || {};
+            document.querySelectorAll('.sq').forEach(i => i.value = n[i.id.replace('q','')] || '');
+        });
+        db.ref('teams').on('value', s => {
+            const t = s.val() || {t:'Seahawks', s:'Patriots'};
+            document.getElementById('label-top').innerText = t.t.toUpperCase();
+            document.getElementById('label-side').innerHTML = t.s.toUpperCase().split('').join('<br>');
+            document.getElementById('title').innerText = `🏈 ${t.t} vs ${t.s}`;
+        });
+        db.ref('price').on('value', s => {
+            const val = s.val() || 0;
+            const split = (val * 100 / 4).toFixed(2);
+            ['p1','p2','p3','p4'].forEach(id => document.getElementById(id).innerText = '$' + split);
+        });
+        db.ref('nums').on('value', s => {
+            const n = s.val(); if(!n) return;
+            document.getElementById('top-nums').innerHTML = n.t.map(v => `<th class="num t-n">${v}</th>`).join('');
+            n.s.forEach((v, i) => document.getElementById('sn-'+i).innerText = v);
+            refreshWin();
+        });
+        db.ref('score').on('value', s => {
+            const sc = s.val() || {t:'', s:''};
+            document.getElementById('s-top').value = sc.t;
+            document.getElementById('s-side').value = sc.s;
+            refreshWin();
+        });
+        
+        // CHAT LISTENER (Shows last 50 messages)
+        db.ref('chat').limitToLast(50).on('value', snap => {
+            const display = document.getElementById('chat-display');
+            display.innerHTML = '';
+            snap.forEach(child => {
+                const data = child.val();
+                display.innerHTML += `<div class="msg"><b>${data.name}:</b> ${data.msg}</div>`;
             });
+            display.scrollTop = display.scrollHeight;
         });
 
-        db.ref('teams').on('value', snap => {
-            const teams = snap.val() || {top: 'Seahawks', side: 'Patriots'};
-            document.getElementById('edit-top').value = teams.top;
-            document.getElementById('edit-side').value = teams.side;
-            document.getElementById('label-top').innerText = teams.top.toUpperCase();
-            document.getElementById('label-side').innerHTML = teams.side.toUpperCase().split('').join('<br>');
-            document.getElementById('title').innerText = `🏈 ${teams.top} vs ${teams.side}`;
-        });
-
-        db.ref('numbers').on('value', snap => {
-            const nums = snap.val();
-            const topRow = document.getElementById('top-nums');
-            if(!nums) {
-                topRow.innerHTML = Array(10).fill('<th class="num">?</th>').join('');
-                document.querySelectorAll('.s-n').forEach(el => el.innerText = '?');
-                return;
-            }
-            topRow.innerHTML = nums.top.map(n => `<th class="num t-n">${n}</th>`).join('');
-            nums.side.forEach((n, i) => { document.getElementById(`sn-${i}`).innerText = n; });
-            refreshHighlight();
-        });
-
-        db.ref('currentScore').on('value', snap => {
-            const score = snap.val() || {top: '', side: ''};
-            document.getElementById('s-top').value = score.top;
-            document.getElementById('s-side').value = score.side;
-            refreshHighlight();
-        });
-
-        function refreshHighlight() {
+        function refreshWin() {
             const tD = document.getElementById('s-top').value.slice(-1);
             const sD = document.getElementById('s-side').value.slice(-1);
-            document.querySelectorAll('td').forEach(td => td.classList.remove("winner"));
-            if(tD === "" || sD === "") return;
-            const tIdx = Array.from(document.querySelectorAll('.t-n')).findIndex(el => el.innerText == tD);
-            const sIdx = Array.from(document.querySelectorAll('.s-n')).findIndex(el => el.innerText == sD);
-            if (tIdx > -1 && sIdx > -1) document.getElementById(`q${sIdx}${tIdx}`).parentElement.classList.add("winner");
+            document.querySelectorAll('td').forEach(td => td.classList.remove('winner'));
+            if(tD==='' || sD==='') return;
+            const tI = Array.from(document.querySelectorAll('.t-n')).findIndex(e => e.innerText == tD);
+            const sI = Array.from(document.querySelectorAll('.s-n')).findIndex(e => e.innerText == sD);
+            if(tI > -1 && sI > -1) document.getElementById('q'+sI+tI).parentElement.classList.add('winner');
         }
     </script>
 </body>
