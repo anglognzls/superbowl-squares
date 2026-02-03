@@ -9,23 +9,22 @@
     
     <style>
         :root { 
-            --blue: #002244; /* Top Team Color */
-            --red: #C60C30;  /* Side Team Color */
+            --blue: #002244; 
+            --red: #C60C30;  
             --gold: #f39c12; 
             --bg: #121212; 
         }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: #fff; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
         
-        .card { background: white; color: #333; padding: 15px; border-radius: 12px; width: 100%; max-width: 900px; margin-bottom: 15px; box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.5); overflow: hidden; }
+        h2, h4 { text-align: center; width: 100%; margin-top: 5px; }
+
+        .card { background: white; color: #333; padding: 15px; border-radius: 12px; width: 100%; max-width: 900px; margin-bottom: 15px; box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.5); overflow: hidden; text-align: center; }
         
         .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 10px; border-radius: 8px; }
         
         #mainTable { border-collapse: collapse; margin: 0 auto; background: white; min-width: 600px; } 
         #mainTable th, #mainTable td { border: 1px solid #ccc; height: 45px; text-align: center; }
         
-        .payout-table { width: 100%; min-width: 300px; border-collapse: collapse; }
-        .payout-table td { padding: 10px 5px; border-bottom: 1px solid #eee; font-size: 14px; }
-
         .team-top { background: var(--blue); color: white; font-weight: bold; font-size: 14px; transition: 0.3s; }
         .team-side { background: var(--red); color: white; width: 30px; writing-mode: vertical-rl; transform: rotate(180deg); font-weight: bold; font-size: 14px; transition: 0.3s; }
         .num { background: #eee; font-weight: bold; color: #000; font-size: 1.2rem; width: 40px; }
@@ -36,19 +35,26 @@
         .ticker-anim { animation: flash 1s ease-in-out; }
         @keyframes flash { 0% { background: #4caf50; color: white; } 100% { background: #333; color: #4caf50; } }
 
-        .counter-badge { background: var(--red); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; float: right; font-weight: bold; }
-        .winner { background: #fff59d !important; animation: pulse 2s infinite; border: 2px solid var(--gold); }
-        @keyframes pulse { 0%, 100% { background: #fff59d; } 50% { background: #ffd54f; } }
+        .counter-badge { background: var(--red); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; display: inline-block; margin-bottom: 10px; }
         
+        .winner { background: #fff59d !important; animation: pulse 2s infinite; border: 3px solid var(--gold) !important; box-shadow: inset 0 0 10px var(--gold); }
+        @keyframes pulse { 0%, 100% { background: #fff59d; } 50% { background: #ffd54f; } }
+
         button { padding: 10px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; color: white; }
         .btn-main { background: var(--blue); }
         .btn-share { background: #2196F3; font-size: 14px; margin-top: 10px; width: 100%; }
         .btn-gold { background: var(--gold); }
         .btn-reset { background: #607d8b; }
-        .color-label { font-size: 11px; color: #666; font-weight: normal; display: block; }
+        .btn-del { background: #ff5252; padding: 2px 6px; font-size: 10px; margin-left: 10px; }
+        .color-label { font-size: 11px; color: #666; font-weight: normal; display: block; text-align: center; margin-bottom: 5px; }
 
-        #chat-display { height: 100px; overflow-y: auto; font-size: 13px; border: 1px solid #ddd; padding: 10px; margin-bottom: 8px; background: #fafafa; border-radius: 4px; }
-        
+        /* CENTERED CHAT STYLES */
+        #chat-display { height: 120px; overflow-y: auto; font-size: 13px; border: 1px solid #ddd; padding: 10px; margin-bottom: 8px; background: #fafafa; border-radius: 4px; text-align: center; }
+        .chat-line { margin-bottom: 5px; }
+
+        .win-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 14px; }
+        .win-badge { background: var(--gold); color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 11px; margin-right: 8px; }
+
         @media (max-width: 600px) {
             .team-side { width: 20px; font-size: 10px; }
             #mainTable th, #mainTable td { height: 40px; }
@@ -58,23 +64,28 @@
 </head>
 <body>
 
-    <h2 id="header-display">🏈 Super Bowl LIX</h2>
+    <h2 id="header-display">🏈 SUPER BOWL LX 🏈</h2>
 
     <div id="activity-ticker"></div>
 
     <div class="card" id="admin-fields" style="display:none; background: #fff3e0; border: 2px solid #ffcc80;">
-        <h4 style="margin:0 0 10px 0; color: #e65100;">Commissioner Dashboard</h4>
+        <h4 style="color: #e65100;">Commissioner Dashboard</h4>
         
-        <div style="margin-bottom:15px;">
-            <label class="color-label">Display Header Title:</label>
-            <input type="text" id="edit-header" placeholder="e.g. Super Bowl 2026" oninput="pushHeader()" style="width:100%; padding:8px; box-sizing:border-box;">
-        </div>
-
-        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+        <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content: center; margin-bottom:12px;">
             <button onclick="toggleLock()" id="lock-btn" class="btn-main">🔒 LOCK BOARD</button>
             <button onclick="pushShuffle()" class="btn-gold">🎲 SHUFFLE</button>
             <button onclick="resetNumbersOnly()" class="btn-reset">❓ HIDE NUMS</button>
             <button onclick="globalReset()" style="background: var(--red)">🧹 RESET ALL</button>
+        </div>
+
+        <div style="margin-bottom: 12px; padding: 10px; background: #fff; border-radius: 8px; border: 1px solid #ddd;">
+            <label class="color-label">Live Score (Highlights winning square):</label>
+            <div style="display: flex; justify-content: center; align-items: center; gap: 10px;">
+                <input type="number" id="s-top" placeholder="Top Score" oninput="pushScore()" style="width:70px"> 
+                <span>VS</span> 
+                <input type="number" id="s-side" placeholder="Side Score" oninput="pushScore()" style="width:70px">
+            </div>
+            <button onclick="saveWinnerPrompt()" class="btn-main" style="margin-top: 10px; font-size: 12px; width: 100%;">💾 SAVE AS QUARTER WINNER</button>
         </div>
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
@@ -93,18 +104,13 @@
                 </div>
             </div>
         </div>
-
-        <div style="font-size: 13px;">
-            Price: $<input type="number" id="edit-price" style="width:50px" oninput="updatePot()">
-            Splits (%): <input type="text" id="payout-split" value="25,25,25,25" style="width:90px" oninput="updatePot()">
-        </div>
         <textarea id="rules-editor" style="width:100%; height:50px; margin-top:10px;" oninput="updateRules()" placeholder="Edit house rules here..."></textarea>
     </div>
 
     <div class="card">
         <div class="counter-badge" id="squares-left">100 Left</div>
-        <h4 style="margin:0 0 5px 0">📜 House Rules</h4>
-        <div id="rules-text" style="font-size: 14px; white-space: pre-wrap;">Loading rules...</div>
+        <h4>📜 House Rules</h4>
+        <div id="rules-text" style="font-size: 14px; white-space: pre-wrap; text-align: center;">Loading rules...</div>
         <button onclick="copyShareLink()" class="btn-share">🔗 SHARE WITH FRIENDS</button>
     </div>
 
@@ -116,24 +122,14 @@
     </div>
 
     <div class="card">
-        <h4 style="margin:0">🏆 Payouts (Pot: <span id="total-pot">$0</span>)</h4>
-        <div class="table-wrap">
-            <table class="payout-table">
-                <tr><td><b>Q1</b></td><td id="h1">Waiting...</td><td id="p1">$0</td></tr>
-                <tr><td><b>Half</b></td><td id="h2">Waiting...</td><td id="p2">$0</td></tr>
-                <tr><td><b>Q3</b></td><td id="h3">Waiting...</td><td id="p3">$0</td></tr>
-                <tr><td><b>Final</b></td><td id="h4">Waiting...</td><td id="p4">$0</td></tr>
-            </table>
-        </div>
-        <div style="margin-top:5px; border-top: 1px solid #eee; padding-top:10px; text-align:center;">
-            <small><b>Live Score Tracker:</b></small><br>
-            <span id="label-score-top" style="font-size:12px; font-weight:bold; color:var(--blue)">Top</span>: <input type="number" id="s-top" style="width:40px" oninput="pushScore()">
-            <span id="label-score-side" style="font-size:12px; font-weight:bold; color:var(--red)">Side</span>: <input type="number" id="s-side" style="width:40px" oninput="pushScore()">
-            <br><button onclick="saveWinnerPrompt()" class="btn-main" style="font-size:11px; margin-top:8px;">💾 SAVE WINNER</button>
+        <h4>🏆 Official Winners</h4>
+        <div id="winner-list" style="max-height: 200px; overflow-y: auto;">
+            <div style="color:#aaa; font-size:12px; text-align:center;">No winners recorded yet.</div>
         </div>
     </div>
 
     <div class="card">
+        <h4>💬 Smack Talk</h4>
         <div id="chat-display"></div>
         <div style="display:flex; gap:5px;">
             <input type="text" id="chat-name" placeholder="Name" style="width:70px; padding:5px;">
@@ -170,25 +166,21 @@
                 let row = document.createElement('tr');
                 if(r === 0) row.innerHTML = `<th rowspan="10" class="team-side" id="label-side">SIDE</th>`;
                 row.innerHTML += `<th class="num s-n" id="sn-${r}">?</th>`;
-                for(let c=0; c<10; c++) row.innerHTML += `<td><input class="sq" id="q${r}${c}" onchange="claimSquare('${r}${c}', this.value)"></td>`;
+                for(let c=0; c<10; c++) row.innerHTML += `<td id="cell-${r}${c}"><input class="sq" id="q${r}${c}" onchange="claimSquare('${r}${c}', this.value)"></td>`;
                 table.appendChild(row);
             }
         }
         initGrid();
 
-        // Admin Pushers
-        function pushHeader() { if(isAdmin) db.ref('header').set(document.getElementById('edit-header').value); }
-        
         function pushTeams() {
             if(!isAdmin) return;
-            const data = {
+            db.ref('teams').set({
                 t: document.getElementById('edit-top').value,
                 s: document.getElementById('edit-side').value,
                 cT: document.getElementById('color-top').value,
                 cS: document.getElementById('color-side').value,
                 pass: 'Number.02superbowl'
-            };
-            db.ref('teams').set(data);
+            });
         }
 
         function copyShareLink() {
@@ -197,27 +189,22 @@
         }
 
         function updateRules() { if(isAdmin) db.ref('gameRules').set({ text: document.getElementById('rules-editor').value, pass: 'Number.02superbowl' }); }
-
-        function pushShuffle() {
-            if(!isAdmin) return;
-            const r = () => [0,1,2,3,4,5,6,7,8,9].sort(() => Math.random()-0.5);
-            db.ref('nums').set({ t: r(), s: r(), pass: 'Number.02superbowl' });
-        }
-
+        function pushShuffle() { if(isAdmin) { const r = () => [0,1,2,3,4,5,6,7,8,9].sort(() => Math.random()-0.5); db.ref('nums').set({ t: r(), s: r(), pass: 'Number.02superbowl' }); } }
         function resetNumbersOnly() { if (isAdmin && confirm("Hide numbers?")) db.ref('nums').set({ t: null, s: null, pass: 'Number.02superbowl' }); }
-
         function globalReset() { if (isAdmin && confirm("WIPE DATABASE?")) { db.ref('/').set({ pass: 'Number.02superbowl' }); location.reload(); } }
-
         function toggleLock() { if(isAdmin) db.ref('isLocked').set(!isLocked); }
+        function pushScore() { db.ref('score').set({t:document.getElementById('s-top').value, s:document.getElementById('s-side').value}); }
 
         function saveWinnerPrompt() {
-            const q = prompt("Quarter? (1, 2, 3, or 4)");
-            if(!["1","2","3","4"].includes(q)) return;
+            const q = prompt("Which Quarter? (e.g. Q1, Half, Q3, Final)");
+            if(!q) return;
             const winnerCell = document.querySelector('.winner input');
-            const winnerName = winnerCell ? winnerCell.value : "Empty Square";
+            const name = winnerCell ? winnerCell.value : "Empty Square";
             const score = `${document.getElementById('s-top').value}-${document.getElementById('s-side').value}`;
-            db.ref('history/'+q).set({ name: winnerName, score: score });
+            db.ref('history').push({ q, name, score });
         }
+
+        function deleteWin(key) { if(isAdmin && confirm("Delete record?")) db.ref('history/'+key).remove(); }
 
         function claimSquare(id, val) {
             if(isLocked && !isAdmin) return;
@@ -228,8 +215,6 @@
             }
         }
 
-        function pushScore() { db.ref('score').set({t:document.getElementById('s-top').value, s:document.getElementById('s-side').value}); }
-
         function sendChat() {
             const name = document.getElementById('chat-name').value || "Guest", msg = document.getElementById('chat-msg').value;
             if(msg) db.ref('chat').push({ name, msg });
@@ -237,13 +222,6 @@
         }
 
         // --- LISTENERS ---
-        db.ref('header').on('value', s => {
-            const val = s.val() || "🏈 Super Bowl LIX";
-            document.getElementById('header-display').innerText = val;
-            document.getElementById('tab-title').innerText = val;
-            if(isAdmin) document.getElementById('edit-header').value = val;
-        });
-
         db.ref('isLocked').on('value', s => { 
             isLocked = s.val() || false;
             document.getElementById('lock-btn').innerText = isLocked ? "🔓 UNLOCK" : "🔒 LOCK";
@@ -280,17 +258,10 @@
 
         db.ref('teams').on('value', s => { 
             const t = s.val() || {t:'Top Team', s:'Side Team', cT:'#002244', cS:'#C60C30'};
-            
-            // Update Text
             document.getElementById('label-top').innerText = t.t;
             document.getElementById('label-side').innerText = t.s;
-            document.getElementById('label-score-top').innerText = t.t;
-            document.getElementById('label-score-side').innerText = t.s;
-            
-            // Update CSS Variables (Colors)
             document.documentElement.style.setProperty('--blue', t.cT);
             document.documentElement.style.setProperty('--red', t.cS);
-
             if(isAdmin) {
                 document.getElementById('edit-top').value = t.t;
                 document.getElementById('edit-side').value = t.s;
@@ -313,25 +284,26 @@
 
         db.ref('score').on('value', s => { 
             const sc = s.val() || {t:0, s:0};
-            document.getElementById('s-top').value = sc.t; document.getElementById('s-side').value = sc.s;
+            document.getElementById('s-top').value = sc.t; 
+            document.getElementById('s-side').value = sc.s;
             refreshWin();
         });
 
-        db.ref('history').on('value', s => { 
-            const h = s.val() || {};
-            for(let i=1; i<=4; i++) if(h[i]) document.getElementById('h'+i).innerHTML = `<b>${h[i].name}</b> (${h[i].score})`;
+        db.ref('history').on('value', snap => {
+            const list = document.getElementById('winner-list'); list.innerHTML = '';
+            if(!snap.exists()) { list.innerHTML = '<div style="color:#aaa; font-size:12px; text-align:center;">No winners recorded yet.</div>'; return; }
+            snap.forEach(child => {
+                const d = child.val();
+                const delBtn = isAdmin ? `<button class="btn-del" onclick="deleteWin('${child.key}')">X</button>` : '';
+                list.innerHTML += `<div class="win-row"><span><span class="win-badge">${d.q}</span><b>${d.name}</b></span><span><small style="color:#666">${d.score}</small>${delBtn}</span></div>`;
+            });
         });
-
-        function updatePot() {
-            const total = (parseFloat(document.getElementById('edit-price').value) || 0) * 100;
-            const perc = (document.getElementById('payout-split').value || "25,25,25,25").split(',').map(Number);
-            document.getElementById('total-pot').innerText = '$' + total;
-            perc.forEach((p, i) => document.getElementById('p'+(i+1)).innerText = '$' + ((p/100)*total).toFixed(0));
-        }
 
         db.ref('chat').limitToLast(10).on('value', snap => {
             const d = document.getElementById('chat-display'); d.innerHTML = '';
-            snap.forEach(c => { d.innerHTML += `<div><b>${c.val().name}:</b> ${c.val().msg}</div>`; });
+            snap.forEach(c => { 
+                d.innerHTML += `<div class="chat-line"><b>${c.val().name}:</b> ${c.val().msg}</div>`; 
+            });
             d.scrollTop = d.scrollHeight;
         });
 
@@ -343,8 +315,8 @@
             const tI = Array.from(document.querySelectorAll('.t-n')).findIndex(e => e.innerText == tD);
             const sI = Array.from(document.querySelectorAll('.s-n')).findIndex(e => e.innerText == sD);
             if(tI > -1 && sI > -1) {
-                const target = document.getElementById('q'+sI+tI);
-                if(target) target.parentElement.classList.add('winner');
+                const target = document.getElementById('cell-'+sI+tI);
+                if(target) target.classList.add('winner');
             }
         }
     </script>
