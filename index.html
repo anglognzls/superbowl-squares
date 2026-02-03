@@ -34,6 +34,7 @@
         button:active { transform: scale(0.95); }
         .btn-main { background: var(--blue); }
         .btn-copy { background: #4caf50; }
+        .btn-share { background: #2196F3; font-size: 12px; margin-top: 10px; width: 100%; }
         .btn-gold { background: var(--gold); }
         .btn-reset { background: #607d8b; }
 
@@ -55,7 +56,6 @@
     <div class="card" id="admin-fields" style="display:none; background: #fff3e0; border: 2px solid #ffcc80;">
         <h4 style="margin:0 0 10px 0; color: #e65100;">Commissioner Dashboard</h4>
         <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
-            <button onclick="copyShareLink()" class="btn-copy">🔗 COPY SHARE LINK</button>
             <button onclick="toggleLock()" id="lock-btn" class="btn-main">🔒 LOCK BOARD</button>
             <button onclick="pushShuffle()" class="btn-gold">🎲 SHUFFLE</button>
             <button onclick="resetNumbersOnly()" class="btn-reset">❓ HIDE NUMS</button>
@@ -77,6 +77,7 @@
         <div class="counter-badge" id="squares-left">100 Left</div>
         <h4 style="margin:0 0 5px 0">📜 House Rules</h4>
         <div id="rules-text" style="font-size: 14px; white-space: pre-wrap;">Loading rules...</div>
+        <button onclick="copyShareLink()" class="btn-share">🔗 CLICK TO COPY SHARE LINK</button>
     </div>
 
     <div class="table-wrap">
@@ -115,7 +116,6 @@
     </div>
 
     <script>
-        // --- CONFIG ---
         const firebaseConfig = {
             apiKey: "AIzaSyAyUTAJvlOYwwkQDbn4aIv2T45j8v4cA1g",
             authDomain: "super-bowl-2026-c3939.firebaseapp.com",
@@ -149,7 +149,7 @@
 
         function copyShareLink() {
             const url = window.location.origin + window.location.pathname;
-            navigator.clipboard.writeText(url).then(() => alert("Share Link Copied! Password removed."));
+            navigator.clipboard.writeText(url).then(() => alert("Share Link Copied! Good luck filling the board!"));
         }
 
         function updateRules() {
