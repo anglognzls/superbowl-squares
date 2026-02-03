@@ -94,9 +94,9 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Admin Auth (Check URL for ?pass=squares2026)
+        // Admin Auth (Check URL for ?pass=Number.02superbowl)
         const urlParams = new URLSearchParams(window.location.search);
-        const isAdmin = urlParams.get('pass') === 'squares2026';
+        const isAdmin = urlParams.get('pass') === 'Number.02superbowl';
         if (isAdmin) document.getElementById('admin-fields').style.display = 'block';
 
         // --- 2. GRID GENERATION ---
