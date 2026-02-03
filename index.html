@@ -189,9 +189,28 @@
         }
 
         function updateRules() { if(isAdmin) db.ref('gameRules').set({ text: document.getElementById('rules-editor').value, pass: 'Number.02superbowl' }); }
-        function pushShuffle() { if(isAdmin) { const r = () => [0,1,2,3,4,5,6,7,8,9].sort(() => Math.random()-0.5); db.ref('nums').set({ t: r(), s: r(), pass: 'Number.02superbowl' }); } }
+        
+        // ADMIN: ADDED SHUFFLE CONFIRMATION
+        function pushShuffle() { 
+            if(isAdmin) { 
+                if(!confirm("🎲 Shuffle the numbers? This changes coordinates for everyone!")) return;
+                const r = () => [0,1,2,3,4,5,6,7,8,9].sort(() => Math.random()-0.5); 
+                db.ref('nums').set({ t: r(), s: r(), pass: 'Number.02superbowl' }); 
+            } 
+        }
+
         function resetNumbersOnly() { if (isAdmin && confirm("Hide numbers?")) db.ref('nums').set({ t: null, s: null, pass: 'Number.02superbowl' }); }
-        function globalReset() { if (isAdmin && confirm("WIPE DATABASE?")) { db.ref('/').set({ pass: 'Number.02superbowl' }); location.reload(); } }
+        
+        // ADMIN: ADDED GLOBAL RESET CONFIRMATION
+        function globalReset() { 
+            if (isAdmin) {
+                if(confirm("⚠️ WIPE DATABASE? This deletes all names, chat, and winners!")) {
+                    db.ref('/').set({ pass: 'Number.02superbowl' }); 
+                    location.reload(); 
+                }
+            }
+        }
+
         function toggleLock() { if(isAdmin) db.ref('isLocked').set(!isLocked); }
         function pushScore() { db.ref('score').set({t:document.getElementById('s-top').value, s:document.getElementById('s-side').value}); }
 
@@ -206,12 +225,36 @@
 
         function deleteWin(key) { if(isAdmin && confirm("Delete record?")) db.ref('history/'+key).remove(); }
 
+        // USER: ADDED LOCK ALERT, CLAIM CONFIRMATION, AND OVERWRITE PROTECTION
         function claimSquare(id, val) {
-            if(isLocked && !isAdmin) return;
-            if(!cellOwnership[id] || cellOwnership[id] === myID || isAdmin) {
+            const inputField = document.getElementById('q' + id);
+            
+            // Lock Check
+            if(isLocked && !isAdmin) {
+                alert("🔒 The board is currently LOCKED!");
+                db.ref('names/'+id).once('value', s => { inputField.value = s.val() || ""; });
+                return;
+            }
+
+            const isSquareEmpty = !cellOwnership[id] || (inputField.value.trim() === "");
+            const iOwnThis = cellOwnership[id] === myID;
+
+            if (isSquareEmpty || iOwnThis || isAdmin) {
+                // New Claim Confirmation
+                if (isSquareEmpty && val.trim() !== "") {
+                    if (!confirm(`Claim this square as "${val}"?`)) {
+                        inputField.value = ""; 
+                        return;
+                    }
+                }
+                
                 db.ref('names/'+id).set(val);
                 db.ref('owners/'+id).set(myID);
-                if(val.trim() !== "") db.ref('lastAction').set({ msg: `🔥 ${val} grabbed a square!`, time: Date.now() });
+                if(val.trim() !== "" && isSquareEmpty) db.ref('lastAction').set({ msg: `🔥 ${val} grabbed a square!`, time: Date.now() });
+            } else {
+                // Overwrite Prevention
+                alert("🚫 This square is already taken!");
+                db.ref('names/'+id).once('value', s => { inputField.value = s.val() || ""; });
             }
         }
 
