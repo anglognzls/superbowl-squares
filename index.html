@@ -2,206 +2,215 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Live Football Squares & Trash Talk</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Live Football Squares & History</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     
     <style>
-        :root { --blue: #002244; --red: #C60C30; }
-        body { font-family: "Arial Black", sans-serif; background: #222; color: #333; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .controls, .info-box, .chat-box { background: white; padding: 20px; border-radius: 8px; width: 900px; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); box-sizing: border-box; }
-        .table-wrap { background: white; padding: 15px; border: 3px solid black; margin-bottom: 20px; }
-        table { border-collapse: collapse; table-layout: fixed; width: 860px; } 
-        th, td { border: 2px solid black; height: 75px; text-align: center; vertical-align: middle; }
-        .team-top { background: var(--blue); color: white; font-size: 1.5rem; height: 50px; }
-        .team-side { background: var(--red); color: white; font-size: 1.5rem; line-height: 1.1; width: 50px; }
-        .num { background: #ddd; font-size: 1.8rem; font-weight: bold; }
-        input.sq { width: 100%; height: 100%; border: none; text-align: center; font-size: 13px; background: transparent; outline: none; font-weight: bold; }
-        .winner { background: #ffeb3b !important; box-shadow: inset 0 0 15px rgba(0,0,0,0.2); }
-        button { padding: 10px 15px; margin: 5px; font-weight: bold; cursor: pointer; border: none; border-radius: 4px; background: var(--blue); color: white; }
-        .admin-only { display: none; background: #f1f1f1; padding: 15px; border: 2px dashed #999; margin-bottom: 10px; border-radius: 8px; }
+        :root { --blue: #002244; --red: #C60C30; --gold: #f39c12; --bg: #121212; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: #fff; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
         
-        #chat-display { height: 180px; overflow-y: auto; border: 1px solid #ddd; text-align: left; padding: 10px; margin-bottom: 10px; background: #f9f9f9; font-family: sans-serif; font-size: 0.95rem; border-radius: 4px; }
-        .msg { margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid #eee; }
-        .msg b { color: var(--red); }
+        .card { background: white; color: #333; padding: 15px; border-radius: 12px; width: 100%; max-width: 900px; margin-bottom: 15px; box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; background: white; padding: 5px; margin-bottom: 15px; width: 100%; max-width: 900px; box-sizing: border-box; }
         
-        .payout-grid { display: flex; justify-content: space-around; margin-top: 15px; }
-        .payout-item { border: 2px solid #eee; padding: 10px; border-radius: 5px; width: 22%; background: #fff; }
-        @media print { .controls, button, .admin-only, .chat-box { display: none !important; } }
+        table { border-collapse: collapse; width: 100%; min-width: 500px; } 
+        th, td { border: 1px solid #ccc; height: 40px; text-align: center; font-size: 12px; }
+        
+        .team-top { background: var(--blue); color: white; font-weight: bold; }
+        .team-side { background: var(--red); color: white; width: 35px; writing-mode: vertical-rl; transform: rotate(180deg); }
+        .num { background: #eee; font-weight: bold; color: #000; }
+
+        input.sq { width: 100%; height: 100%; border: none; text-align: center; background: transparent; font-size: 11px; font-weight: bold; outline: none; }
+        .winner { background: #fff59d !important; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { background: #fff59d; } 50% { background: #ffd54f; } 100% { background: #fff59d; } }
+
+        .history-table { width: 100%; margin-top: 10px; border-top: 2px solid #eee; }
+        .history-table td { padding: 8px; font-size: 14px; }
+        .history-table b { color: var(--red); }
+
+        button { padding: 10px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; color: white; }
+        .btn-main { background: var(--blue); }
+        .btn-gold { background: var(--gold); }
+        
+        #chat-display { height: 100px; overflow-y: auto; font-size: 13px; border: 1px solid #ddd; padding: 10px; margin-bottom: 8px; background: #fafafa; }
     </style>
 </head>
 <body>
 
-    <div class="controls">
-        <h2 id="title">🏈 Loading Game...</h2>
-        
-        <div class="admin-only" id="admin-fields">
-            <h4 style="margin:0 0 10px 0;">🛠️ COMMISSIONER TOOLS</h4>
-            Update Top Team: <input type="text" id="edit-top" placeholder="Top Team" oninput="pushTeams()" style="width:110px"> 
-            Side Team: <input type="text" id="edit-side" placeholder="Side Team" oninput="pushTeams()" style="width:110px">
-            <br>
-            Price per Square: $<input type="number" id="edit-price" value="10" oninput="pushPrice()" style="width:50px">
-            <button onclick="pushShuffle()" style="background:#f39c12;">🎲 RANDOMIZE NUMS</button>
-            <button onclick="globalReset()" style="background:#C60C30;">⚠️ RESET EVERYTHING</button>
-        </div>
+    <h2 id="title" style="margin: 10px 0;">🏈 Loading...</h2>
 
-        <button onclick="window.print()" style="background:#444;">🖨️ PRINT TO PDF</button>
-        <br><br>
-        <strong>CURRENT SCORE</strong><br>
-        <span id="label-score-top">Top</span>: <input type="number" id="s-top" style="width:45px"> 
-        <span id="label-score-side">Side</span>: <input type="number" id="s-side" style="width:45px">
-        <button onclick="pushWinner()" style="background:green;">🏆 HIGHLIGHT WINNER</button>
+    <div class="card" id="admin-fields" style="display:none; background: #fff3e0;">
+        <h4 style="margin:0 0 10px 0">Commissioner Tools</h4>
+        <div style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px;">
+            <input type="text" id="edit-top" placeholder="Top Team" oninput="pushTeams()" style="width:45%">
+            <input type="text" id="edit-side" placeholder="Side Team" oninput="pushTeams()" style="width:45%">
+			<button onclick="resetNumbersOnly()" style="background:#607d8b;">❓ HIDE NUMBERS</button>
+        </div>
+        <div style="font-size: 0.8rem; margin-bottom:10px;">
+            Payout % (Q1,Q2,Q3,F): <input type="text" id="payout-split" value="20,30,20,30" style="width:100px" oninput="updatePot()">
+            Price: $<input type="number" id="edit-price" style="width:50px" oninput="updatePot()">
+        </div>
+        <button onclick="toggleLock()" id="lock-btn" class="btn-main">🔒 LOCK BOARD</button>
+        <button onclick="pushShuffle()" class="btn-gold">🎲 SHUFFLE</button>
+        <button onclick="db.ref('history').set(null)" style="background:#666">🧹 CLEAR HISTORY</button>
     </div>
 
     <div class="table-wrap">
         <table id="mainTable">
-            <colgroup><col style="width:50px;"><col style="width:50px;"><col span="10" style="width:76px;"></colgroup>
-            <tr><th colspan="2" rowspan="2" style="border:none"></th><th colspan="10" class="team-top" id="label-top">TEAM A</th></tr>
+            <tr id="top-row-label"></tr>
             <tr id="top-nums"></tr>
         </table>
     </div>
 
-    <div class="info-box">
-        <h3>💰 Payouts (Total Pot: <span id="total-pot">$0</span>)</h3>
-        <div class="payout-grid">
-            <div class="payout-item"><strong>1st Quarter</strong><br><span id="p1">$0</span></div>
-            <div class="payout-item"><strong>Halftime</strong><br><span id="p2">$0</span></div>
-            <div class="payout-item"><strong>3rd Quarter</strong><br><span id="p3">$0</span></div>
-            <div class="payout-item"><strong>Final Score</strong><br><span id="p4">$0</span></div>
+    <div class="card">
+        <h4 style="margin:0">🏆 Payout History (Pot: <span id="total-pot">$0</span>)</h4>
+        <table class="history-table">
+            <tr><td><b>Q1</b></td><td id="h1">Waiting...</td><td id="p1">$0</td></tr>
+            <tr><td><b>Half</b></td><td id="h2">Waiting...</td><td id="p2">$0</td></tr>
+            <tr><td><b>Q3</b></td><td id="h3">Waiting...</td><td id="p3">$0</td></tr>
+            <tr><td><b>Final</b></td><td id="h4">Waiting...</td><td id="p4">$0</td></tr>
+        </table>
+        
+        <div style="margin-top:15px; border-top: 1px solid #eee; padding-top:10px; text-align:center;">
+            <b>Set Current Score:</b><br>
+            <span id="label-score-top">Top</span>: <input type="number" id="s-top" style="width:40px" oninput="pushScore()">
+            <span id="label-score-side">Side</span>: <input type="number" id="s-side" style="width:40px" oninput="pushScore()">
+            <br>
+            <button onclick="saveWinnerPrompt()" class="btn-main" style="margin-top:10px; font-size:12px;">💾 LOCK IN QUARTER WINNER</button>
         </div>
     </div>
 
-    <div class="chat-box">
-        <h3>💬 Trash Talk Channel</h3>
+    <div class="card">
         <div id="chat-display"></div>
-        <input type="text" id="chat-name" placeholder="Your Name" style="width: 20%; padding:5px;">
-        <input type="text" id="chat-msg" placeholder="Talk some smack..." style="width: 60%; padding:5px;" onkeypress="if(event.key==='Enter') sendChat()">
-        <button onclick="sendChat()">SEND</button>
+        <div style="display:flex; gap:5px;">
+            <input type="text" id="chat-name" placeholder="Name" style="width:60px">
+            <input type="text" id="chat-msg" placeholder="Talk smack..." style="flex-grow:1" onkeypress="if(event.key==='Enter') sendChat()">
+            <button onclick="sendChat()" class="btn-main">Send</button>
+        </div>
     </div>
 
     <script>
-        // --- 1. CONFIGURATION ---
         const firebaseConfig = {
-  apiKey: "AIzaSyAyUTAJvlOYwwkQDbn4aIv2T45j8v4cA1g",
-  authDomain: "super-bowl-2026-c3939.firebaseapp.com",
-  projectId: "super-bowl-2026-c3939",
-  storageBucket: "super-bowl-2026-c3939.firebasestorage.app",
-  messagingSenderId: "262096718545",
-  appId: "1:262096718545:web:497ce0377c36f0333653f0",
-  measurementId: "G-C5CRV8X0CX"
+            apiKey: "AIzaSyAyUTAJvlOYwwkQDbn4aIv2T45j8v4cA1g",
+            authDomain: "super-bowl-2026-c3939.firebaseapp.com",
+            projectId: "super-bowl-2026-c3939",
+            storageBucket: "super-bowl-2026-c3939.firebasestorage.app",
+            messagingSenderId: "262096718545",
+            appId: "1:262096718545:web:497ce0377c36f0333653f0"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        const myID = localStorage.getItem('sq_uid') || Math.random().toString(36).slice(2);
+        localStorage.setItem('sq_uid', myID);
 
-        // Admin Auth (Check URL for ?pass=Number.02superbowl)
-        const urlParams = new URLSearchParams(window.location.search);
-        const isAdmin = urlParams.get('pass') === 'Number.02superbowl';
+        const isAdmin = new URLSearchParams(window.location.search).get('pass') === 'Number.02superbowl';
         if (isAdmin) document.getElementById('admin-fields').style.display = 'block';
 
-        // --- 2. GRID GENERATION ---
-        const table = document.getElementById('mainTable');
-        for(let r=0; r<10; r++) {
-            let row = document.createElement('tr');
-            if(r === 0) row.innerHTML = `<th rowspan="10" class="team-side" id="label-side">TEAM B</th>`;
-            row.innerHTML += `<th class="num s-n" id="sn-${r}">?</th>`;
-            for(let c=0; c<10; c++) {
-                row.innerHTML += `<td><input class="sq" id="q${r}${c}" ${isAdmin?'':'readonly'} oninput="pushName('${r}${c}', this.value)"></td>`;
+        let isLocked = false, cellOwnership = {}, currentNames = {};
+
+        function initGrid() {
+            const table = document.getElementById('mainTable');
+            document.getElementById('top-row-label').innerHTML = `<th colspan="2" rowspan="2" style="border:none"></th><th colspan="10" class="team-top" id="label-top">TOP</th>`;
+            for(let r=0; r<10; r++) {
+                let row = document.createElement('tr');
+                if(r === 0) row.innerHTML = `<th rowspan="10" class="team-side" id="label-side">SIDE</th>`;
+                row.innerHTML += `<th class="num s-n" id="sn-${r}">?</th>`;
+                for(let c=0; c<10; c++) row.innerHTML += `<td><input class="sq" id="q${r}${c}" onchange="claimSquare('${r}${c}', this.value)"></td>`;
+                table.appendChild(row);
             }
-            table.appendChild(row);
         }
+        initGrid();
 
-        // --- 3. DATABASE UPDATERS (Admin Only) ---
-        function pushName(id, val) { if(isAdmin) db.ref('names/'+id).set(val); }
-        function pushTeams() { 
-            if(isAdmin) db.ref('teams').set({t:document.getElementById('edit-top').value, s:document.getElementById('edit-side').value}); 
-        }
-        function pushPrice() { if(isAdmin) db.ref('price').set(document.getElementById('edit-price').value); }
-        function pushWinner() { db.ref('score').set({t:document.getElementById('s-top').value, s:document.getElementById('s-side').value}); }
-        function pushShuffle() {
-            if(!isAdmin) return;
-            const r = () => [0,1,2,3,4,5,6,7,8,9].sort(() => Math.random()-0.5);
-            db.ref('nums').set({t:r(), s:r()});
-        }
-        function globalReset() { if(isAdmin && confirm("WARNING: This wipes all names, numbers, and chat! Proceed?")) db.ref('/').set(null); }
-        
-        // CHAT PUSHER
-        function sendChat() {
-            const name = document.getElementById('chat-name').value || "Guest";
-            const msg = document.getElementById('chat-msg').value;
-            if(!msg) return;
-            db.ref('chat').push({ name, msg, time: Date.now() });
-            document.getElementById('chat-msg').value = '';
-        }
-
-        // --- 4. REAL-TIME LISTENERS ---
-        db.ref('names').on('value', s => {
-            const n = s.val() || {};
-            document.querySelectorAll('.sq').forEach(i => i.value = n[i.id.replace('q','')] || '');
-        });
-
-        db.ref('teams').on('value', s => {
-            const t = s.val() || {t:'Seahawks', s:'Patriots'};
-            document.getElementById('label-top').innerText = t.t.toUpperCase();
-            document.getElementById('label-side').innerHTML = t.s.toUpperCase().split('').join('<br>');
-            document.getElementById('title').innerText = `🏈 ${t.t} vs ${t.s}`;
-            document.getElementById('label-score-top').innerText = t.t;
-            document.getElementById('label-score-side').innerText = t.s;
-            if(isAdmin) {
-                document.getElementById('edit-top').value = t.t;
-                document.getElementById('edit-side').value = t.s;
+        function claimSquare(id, val) {
+            if(isLocked && !isAdmin) return;
+            if(!cellOwnership[id] || cellOwnership[id] === myID || isAdmin) {
+                db.ref('names/'+id).set(val);
+                db.ref('owners/'+id).set(myID);
             }
-        });
+        }
 
-        db.ref('price').on('value', s => {
-            const val = s.val() || 0;
-            const total = val * 100;
-            const quarter = (total / 4).toFixed(2);
+        function saveWinnerPrompt() {
+            const q = prompt("Which Quarter? (1, 2, 3, or 4 for Final)");
+            if(![ "1","2","3","4" ].includes(q)) return;
+            
+            const winnerCell = document.querySelector('.winner input');
+            const winnerName = winnerCell ? winnerCell.value : "Empty Square";
+            const score = `${document.getElementById('s-top').value}-${document.getElementById('s-side').value}`;
+            
+            db.ref('history/'+q).set({ name: winnerName, score: score });
+        }
+
+        function pushScore() { db.ref('score').set({t:document.getElementById('s-top').value, s:document.getElementById('s-side').value}); }
+        function pushTeams() { db.ref('teams').set({t:document.getElementById('edit-top').value, s:document.getElementById('edit-side').value}); }
+        function toggleLock() { db.ref('isLocked').set(!isLocked); }
+        function pushShuffle() { const r = () => [0,1,2,3,4,5,6,7,8,9].sort(() => Math.random()-0.5); db.ref('nums').set({t:r(), s:r()}); }
+        function sendChat() { const name = document.getElementById('chat-name').value || "Guest", msg = document.getElementById('chat-msg').value; if(msg) db.ref('chat').push({ name, msg }); document.getElementById('chat-msg').value = ''; }
+
+        // Syncing
+        db.ref('isLocked').on('value', s => { 
+            isLocked = s.val(); 
+            document.getElementById('lock-btn').innerText = isLocked ? "🔓 UNLOCK" : "🔒 LOCK";
+            document.querySelectorAll('.sq').forEach(i => i.readOnly = (isLocked && !isAdmin) || (cellOwnership[i.id.replace('q','')] && cellOwnership[i.id.replace('q','')] !== myID && !isAdmin));
+        });
+        db.ref('names').on('value', s => { currentNames = s.val() || {}; document.querySelectorAll('.sq').forEach(i => i.value = currentNames[i.id.replace('q','')] || ''); });
+        db.ref('owners').on('value', s => { cellOwnership = s.val() || {}; });
+        db.ref('teams').on('value', s => { const t = s.val() || {t:'Top', s:'Side'}; document.getElementById('label-top').innerText = t.t; document.getElementById('label-side').innerText = t.s; document.getElementById('title').innerText = t.t + ' vs ' + t.s; });
+        db.ref('nums').on('value', s => { const n = s.val(); if(!n) return; document.getElementById('top-nums').innerHTML = n.t.map(v => `<th class="num t-n">${v}</th>`).join(''); n.s.forEach((v, i) => document.getElementById('sn-'+i).innerText = v); refreshWin(); });
+        db.ref('score').on('value', s => { const sc = s.val() || {t:0, s:0}; document.getElementById('s-top').value = sc.t; document.getElementById('s-side').value = sc.s; refreshWin(); });
+        db.ref('history').on('value', s => { const h = s.val() || {}; for(let i=1; i<=4; i++) if(h[i]) document.getElementById('h'+i).innerHTML = `<b>${h[i].name}</b> (${h[i].score})`; });
+
+        function updatePot() {
+            const total = (parseFloat(document.getElementById('edit-price').value) || 0) * 100;
+            const perc = (document.getElementById('payout-split').value || "25,25,25,25").split(',').map(Number);
             document.getElementById('total-pot').innerText = '$' + total;
-            ['p1','p2','p3','p4'].forEach(id => document.getElementById(id).innerText = '$' + quarter);
-            if(isAdmin) document.getElementById('edit-price').value = val;
-        });
+            perc.forEach((p, i) => document.getElementById('p'+(i+1)).innerText = '$' + ((p/100)*total).toFixed(0));
+        }
 
-        db.ref('nums').on('value', s => {
-            const n = s.val();
-            if(!n) {
-                document.getElementById('top-nums').innerHTML = Array(10).fill('<th class="num">?</th>').join('');
-                document.querySelectorAll('.s-n').forEach(el => el.innerText = '?');
-                return;
-            }
-            document.getElementById('top-nums').innerHTML = n.t.map(v => `<th class="num t-n">${v}</th>`).join('');
-            n.s.forEach((v, i) => document.getElementById('sn-'+i).innerText = v);
-            refreshWin();
-        });
-
-        db.ref('score').on('value', s => {
-            const sc = s.val() || {t:'', s:''};
-            document.getElementById('s-top').value = sc.t;
-            document.getElementById('s-side').value = sc.s;
-            refreshWin();
-        });
-        
-        db.ref('chat').limitToLast(30).on('value', snap => {
-            const display = document.getElementById('chat-display');
-            display.innerHTML = '';
-            snap.forEach(child => {
-                const data = child.val();
-                display.innerHTML += `<div class="msg"><b>${data.name}:</b> ${data.msg}</div>`;
-            });
-            display.scrollTop = display.scrollHeight;
-        });
+        db.ref('chat').limitToLast(8).on('value', snap => { const d = document.getElementById('chat-display'); d.innerHTML = ''; snap.forEach(c => d.innerHTML += `<div><b>${c.val().name}:</b> ${c.val().msg}</div>`); d.scrollTop = d.scrollHeight; });
 
         function refreshWin() {
-            const tVal = document.getElementById('s-top').value;
-            const sVal = document.getElementById('s-side').value;
+            const tD = document.getElementById('s-top').value.slice(-1), sD = document.getElementById('s-side').value.slice(-1);
             document.querySelectorAll('td').forEach(td => td.classList.remove('winner'));
-            if(tVal === "" || sVal === "") return;
-            const tD = tVal.slice(-1);
-            const sD = sVal.slice(-1);
-            const tI = Array.from(document.querySelectorAll('.t-n')).findIndex(e => e.innerText == tD);
-            const sI = Array.from(document.querySelectorAll('.s-n')).findIndex(e => e.innerText == sD);
+            if(tD === "" || sD === "") return;
+            const tI = Array.from(document.querySelectorAll('.t-n')).findIndex(e => e.innerText == tD), sI = Array.from(document.querySelectorAll('.s-n')).findIndex(e => e.innerText == sD);
             if(tI > -1 && sI > -1) document.getElementById('q'+sI+tI).parentElement.classList.add('winner');
         }
+		// Example of how to modify your push functions
+		function pushTeams() { 
+		    if(isAdmin) {
+		        db.ref('teams').set({
+		            t: document.getElementById('edit-top').value, 
+		            s: document.getElementById('edit-side').value,
+		            pass: 'Number.02superbowl' // This satisfies the Firebase Rule
+		        }); 
+		    }
+		}
+
+		function globalReset() { 
+		    if(isAdmin && confirm("Wipe everything?")) {
+		        // We set a 'pass' key even on reset to prove we are authorized
+		        db.ref('/').set({ pass: 'Number.02superbowl' }); 
+		    }
+		}
+		function resetNumbersOnly() {
+		    if (isAdmin && confirm("Hide numbers and reset to '?'?")) {
+		        db.ref('nums').set({
+		            t: null,
+		            s: null,
+		            pass: 'Number.02superbowl' // Sending the pass for security rules
+		        });
+		    }
+		}
+		function pushShuffle() {
+		    if(!isAdmin) return;
+		    const r = () => [0,1,2,3,4,5,6,7,8,9].sort(() => Math.random()-0.5);
+		    db.ref('nums').set({
+		        t: r(), 
+		        s: r(),
+		        pass: 'Number.02superbowl' // Required for your new security rules
+		    });
+		}
     </script>
 </body>
 </html>
