@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>2026 Live Super Bowl Squares & Chat</title>
+    <title>Live Football Squares & Trash Talk</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     
@@ -16,67 +16,71 @@
         .team-top { background: var(--blue); color: white; font-size: 1.5rem; height: 50px; }
         .team-side { background: var(--red); color: white; font-size: 1.5rem; line-height: 1.1; width: 50px; }
         .num { background: #ddd; font-size: 1.8rem; font-weight: bold; }
-        input.sq { width: 100%; height: 100%; border: none; text-align: center; font-size: 13px; background: transparent; outline: none; }
+        input.sq { width: 100%; height: 100%; border: none; text-align: center; font-size: 13px; background: transparent; outline: none; font-weight: bold; }
         .winner { background: #ffeb3b !important; box-shadow: inset 0 0 15px rgba(0,0,0,0.2); }
         button { padding: 10px 15px; margin: 5px; font-weight: bold; cursor: pointer; border: none; border-radius: 4px; background: var(--blue); color: white; }
-        .admin-only { display: none; background: #f9f9f9; padding: 15px; border: 1px dashed #ccc; margin-bottom: 10px; }
+        .admin-only { display: none; background: #f1f1f1; padding: 15px; border: 2px dashed #999; margin-bottom: 10px; border-radius: 8px; }
         
-        /* CHAT STYLING */
-        #chat-display { height: 150px; overflow-y: auto; border: 1px solid #ddd; text-align: left; padding: 10px; margin-bottom: 10px; background: #fdfdfd; font-family: sans-serif; font-size: 0.9rem; }
-        .msg { margin-bottom: 5px; border-bottom: 1px solid #f0f0f0; padding-bottom: 2px; }
-        .msg b { color: var(--blue); }
+        #chat-display { height: 180px; overflow-y: auto; border: 1px solid #ddd; text-align: left; padding: 10px; margin-bottom: 10px; background: #f9f9f9; font-family: sans-serif; font-size: 0.95rem; border-radius: 4px; }
+        .msg { margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid #eee; }
+        .msg b { color: var(--red); }
         
         .payout-grid { display: flex; justify-content: space-around; margin-top: 15px; }
-        .payout-item { border: 2px solid #eee; padding: 10px; border-radius: 5px; width: 22%; }
+        .payout-item { border: 2px solid #eee; padding: 10px; border-radius: 5px; width: 22%; background: #fff; }
         @media print { .controls, button, .admin-only, .chat-box { display: none !important; } }
     </style>
 </head>
 <body>
 
     <div class="controls">
-        <h2 id="title">🏈 Seahawks vs Patriots</h2>
+        <h2 id="title">🏈 Loading Game...</h2>
+        
         <div class="admin-only" id="admin-fields">
-            <strong>ADMIN CONTROL PANEL</strong><br>
-            Top: <input type="text" id="edit-top" oninput="pushTeams()" style="width:80px"> 
-            Side: <input type="text" id="edit-side" oninput="pushTeams()" style="width:80px">
-            Price: $<input type="number" id="edit-price" value="10" oninput="pushPrice()" style="width:50px">
-            <button onclick="pushShuffle()" style="background:#f39c12;">🎲 RANDOM NUMS</button>
-            <button onclick="globalReset()" style="background:#C60C30;">⚠️ RESET BOARD</button>
+            <h4 style="margin:0 0 10px 0;">🛠️ COMMISSIONER TOOLS</h4>
+            Update Top Team: <input type="text" id="edit-top" placeholder="Top Team" oninput="pushTeams()" style="width:110px"> 
+            Side Team: <input type="text" id="edit-side" placeholder="Side Team" oninput="pushTeams()" style="width:110px">
+            <br>
+            Price per Square: $<input type="number" id="edit-price" value="10" oninput="pushPrice()" style="width:50px">
+            <button onclick="pushShuffle()" style="background:#f39c12;">🎲 RANDOMIZE NUMS</button>
+            <button onclick="globalReset()" style="background:#C60C30;">⚠️ RESET EVERYTHING</button>
         </div>
-        <button onclick="window.print()" style="background:#444;">🖨️ PRINT PDF</button>
+
+        <button onclick="window.print()" style="background:#444;">🖨️ PRINT TO PDF</button>
         <br><br>
-        Live Score -> Top: <input type="number" id="s-top" style="width:40px"> Side: <input type="number" id="s-side" style="width:40px">
-        <button onclick="pushWinner()" style="background:green;">🏆 UPDATE WINNER</button>
+        <strong>CURRENT SCORE</strong><br>
+        <span id="label-score-top">Top</span>: <input type="number" id="s-top" style="width:45px"> 
+        <span id="label-score-side">Side</span>: <input type="number" id="s-side" style="width:45px">
+        <button onclick="pushWinner()" style="background:green;">🏆 HIGHLIGHT WINNER</button>
     </div>
 
     <div class="table-wrap">
         <table id="mainTable">
             <colgroup><col style="width:50px;"><col style="width:50px;"><col span="10" style="width:76px;"></colgroup>
-            <tr><th colspan="2" rowspan="2" style="border:none"></th><th colspan="10" class="team-top" id="label-top">TOP</th></tr>
+            <tr><th colspan="2" rowspan="2" style="border:none"></th><th colspan="10" class="team-top" id="label-top">TEAM A</th></tr>
             <tr id="top-nums"></tr>
         </table>
     </div>
 
     <div class="info-box">
-        <h3>💰 Payouts (25% Per Quarter)</h3>
+        <h3>💰 Payouts (Total Pot: <span id="total-pot">$0</span>)</h3>
         <div class="payout-grid">
-            <div class="payout-item"><strong>Q1</strong><br><span id="p1">$0</span></div>
+            <div class="payout-item"><strong>1st Quarter</strong><br><span id="p1">$0</span></div>
             <div class="payout-item"><strong>Halftime</strong><br><span id="p2">$0</span></div>
-            <div class="payout-item"><strong>Q3</strong><br><span id="p3">$0</span></div>
-            <div class="payout-item"><strong>Final</strong><br><span id="p4">$0</span></div>
+            <div class="payout-item"><strong>3rd Quarter</strong><br><span id="p3">$0</span></div>
+            <div class="payout-item"><strong>Final Score</strong><br><span id="p4">$0</span></div>
         </div>
     </div>
 
     <div class="chat-box">
-        <h3>💬 Live Trash Talk</h3>
+        <h3>💬 Trash Talk Channel</h3>
         <div id="chat-display"></div>
-        <input type="text" id="chat-name" placeholder="Your Name" style="width: 20%;">
-        <input type="text" id="chat-msg" placeholder="Say something..." style="width: 60%;" onkeypress="if(event.key==='Enter') sendChat()">
-        <button onclick="sendChat()">Send</button>
+        <input type="text" id="chat-name" placeholder="Your Name" style="width: 20%; padding:5px;">
+        <input type="text" id="chat-msg" placeholder="Talk some smack..." style="width: 60%; padding:5px;" onkeypress="if(event.key==='Enter') sendChat()">
+        <button onclick="sendChat()">SEND</button>
     </div>
 
     <script>
-        // --- PASTE YOUR FIREBASE CONFIG HERE ---
+        // --- 1. CONFIGURATION ---
         const firebaseConfig = {
   apiKey: "AIzaSyAyUTAJvlOYwwkQDbn4aIv2T45j8v4cA1g",
   authDomain: "super-bowl-2026-c3939.firebaseapp.com",
@@ -90,16 +94,16 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // ADMIN CHECK (URL needs ?pass=squares2026)
+        // Admin Auth (Check URL for ?pass=squares2026)
         const urlParams = new URLSearchParams(window.location.search);
         const isAdmin = urlParams.get('pass') === 'squares2026';
         if (isAdmin) document.getElementById('admin-fields').style.display = 'block';
 
-        // GRID GEN
+        // --- 2. GRID GENERATION ---
         const table = document.getElementById('mainTable');
         for(let r=0; r<10; r++) {
             let row = document.createElement('tr');
-            if(r === 0) row.innerHTML = `<th rowspan="10" class="team-side" id="label-side">SIDE</th>`;
+            if(r === 0) row.innerHTML = `<th rowspan="10" class="team-side" id="label-side">TEAM B</th>`;
             row.innerHTML += `<th class="num s-n" id="sn-${r}">?</th>`;
             for(let c=0; c<10; c++) {
                 row.innerHTML += `<td><input class="sq" id="q${r}${c}" ${isAdmin?'':'readonly'} oninput="pushName('${r}${c}', this.value)"></td>`;
@@ -107,9 +111,11 @@
             table.appendChild(row);
         }
 
-        // FIREBASE PUSHERS
+        // --- 3. DATABASE UPDATERS (Admin Only) ---
         function pushName(id, val) { if(isAdmin) db.ref('names/'+id).set(val); }
-        function pushTeams() { if(isAdmin) db.ref('teams').set({t:document.getElementById('edit-top').value, s:document.getElementById('edit-side').value}); }
+        function pushTeams() { 
+            if(isAdmin) db.ref('teams').set({t:document.getElementById('edit-top').value, s:document.getElementById('edit-side').value}); 
+        }
         function pushPrice() { if(isAdmin) db.ref('price').set(document.getElementById('edit-price').value); }
         function pushWinner() { db.ref('score').set({t:document.getElementById('s-top').value, s:document.getElementById('s-side').value}); }
         function pushShuffle() {
@@ -117,39 +123,57 @@
             const r = () => [0,1,2,3,4,5,6,7,8,9].sort(() => Math.random()-0.5);
             db.ref('nums').set({t:r(), s:r()});
         }
-        function globalReset() { if(isAdmin && confirm("Clear all?")) db.ref('/').set(null); }
+        function globalReset() { if(isAdmin && confirm("WARNING: This wipes all names, numbers, and chat! Proceed?")) db.ref('/').set(null); }
         
         // CHAT PUSHER
         function sendChat() {
-            const name = document.getElementById('chat-name').value || "Anonymous";
+            const name = document.getElementById('chat-name').value || "Guest";
             const msg = document.getElementById('chat-msg').value;
             if(!msg) return;
             db.ref('chat').push({ name, msg, time: Date.now() });
             document.getElementById('chat-msg').value = '';
         }
 
-        // LISTENERS
+        // --- 4. REAL-TIME LISTENERS ---
         db.ref('names').on('value', s => {
             const n = s.val() || {};
             document.querySelectorAll('.sq').forEach(i => i.value = n[i.id.replace('q','')] || '');
         });
+
         db.ref('teams').on('value', s => {
             const t = s.val() || {t:'Seahawks', s:'Patriots'};
             document.getElementById('label-top').innerText = t.t.toUpperCase();
             document.getElementById('label-side').innerHTML = t.s.toUpperCase().split('').join('<br>');
             document.getElementById('title').innerText = `🏈 ${t.t} vs ${t.s}`;
+            document.getElementById('label-score-top').innerText = t.t;
+            document.getElementById('label-score-side').innerText = t.s;
+            if(isAdmin) {
+                document.getElementById('edit-top').value = t.t;
+                document.getElementById('edit-side').value = t.s;
+            }
         });
+
         db.ref('price').on('value', s => {
             const val = s.val() || 0;
-            const split = (val * 100 / 4).toFixed(2);
-            ['p1','p2','p3','p4'].forEach(id => document.getElementById(id).innerText = '$' + split);
+            const total = val * 100;
+            const quarter = (total / 4).toFixed(2);
+            document.getElementById('total-pot').innerText = '$' + total;
+            ['p1','p2','p3','p4'].forEach(id => document.getElementById(id).innerText = '$' + quarter);
+            if(isAdmin) document.getElementById('edit-price').value = val;
         });
+
         db.ref('nums').on('value', s => {
-            const n = s.val(); if(!n) return;
+            const n = s.val();
+            if(!n) {
+                document.getElementById('top-nums').innerHTML = Array(10).fill('<th class="num">?</th>').join('');
+                document.querySelectorAll('.s-n').forEach(el => el.innerText = '?');
+                return;
+            }
             document.getElementById('top-nums').innerHTML = n.t.map(v => `<th class="num t-n">${v}</th>`).join('');
             n.s.forEach((v, i) => document.getElementById('sn-'+i).innerText = v);
             refreshWin();
         });
+
         db.ref('score').on('value', s => {
             const sc = s.val() || {t:'', s:''};
             document.getElementById('s-top').value = sc.t;
@@ -157,8 +181,7 @@
             refreshWin();
         });
         
-        // CHAT LISTENER (Shows last 50 messages)
-        db.ref('chat').limitToLast(50).on('value', snap => {
+        db.ref('chat').limitToLast(30).on('value', snap => {
             const display = document.getElementById('chat-display');
             display.innerHTML = '';
             snap.forEach(child => {
@@ -169,10 +192,12 @@
         });
 
         function refreshWin() {
-            const tD = document.getElementById('s-top').value.slice(-1);
-            const sD = document.getElementById('s-side').value.slice(-1);
+            const tVal = document.getElementById('s-top').value;
+            const sVal = document.getElementById('s-side').value;
             document.querySelectorAll('td').forEach(td => td.classList.remove('winner'));
-            if(tD==='' || sD==='') return;
+            if(tVal === "" || sVal === "") return;
+            const tD = tVal.slice(-1);
+            const sD = sVal.slice(-1);
             const tI = Array.from(document.querySelectorAll('.t-n')).findIndex(e => e.innerText == tD);
             const sI = Array.from(document.querySelectorAll('.s-n')).findIndex(e => e.innerText == sD);
             if(tI > -1 && sI > -1) document.getElementById('q'+sI+tI).parentElement.classList.add('winner');
