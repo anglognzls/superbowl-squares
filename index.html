@@ -96,6 +96,7 @@
             <button onclick="resetNumbersOnly()" class="btn-reset">❓ HIDE NUMS</button>
             <button onclick="db.ref('confettiTrigger').set(Date.now())" style="background: #9c27b0;">🎉 TEST CONFETTI</button>
             <button onclick="clearWinnerHistory()" style="background: #ef6c00">🏆 CLEAR WINNERS</button>
+            <button onclick="clearChatHistory()" style="background: #795548">💬 CLEAR CHAT</button>
             <button onclick="globalReset()" style="background: var(--red)">🧹 RESET ALL</button>
             <button onclick="downloadBoard()" class="btn-download" style="width: auto; margin-top: 0;">📄 DOWNLOAD PDF</button>
         </div>
@@ -267,6 +268,7 @@
         function resetNumbersOnly() { if (isAdmin && confirm("Hide numbers?")) db.ref('nums').set({ t: null, s: null }); }
         function globalReset() { if (isAdmin && confirm("⚠️ WIPE DATABASE?")) { db.ref('/').remove(); location.reload(); } }
         function clearWinnerHistory() { if (isAdmin && confirm("🏆 Clear winners list?")) db.ref('history').remove(); }
+        function clearChatHistory() { if (isAdmin && confirm("💬 Clear all chat messages?")) db.ref('chat').remove(); }
         function toggleLock() { if(isAdmin) db.ref('isLocked').set(!isLocked); }
         function pushScore() { db.ref('score').set({t:document.getElementById('s-top').value, s:document.getElementById('s-side').value}); }
         function copyShareLink() { navigator.clipboard.writeText(window.location.origin + window.location.pathname).then(() => alert("Link Copied!")); }
@@ -309,8 +311,13 @@
         function sendChat() {
             const name = document.getElementById('chat-name').value || "Guest", msg = document.getElementById('chat-msg').value;
             if(msg) {
-                const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                db.ref('chat').push({ name, msg, time });
+                const now = new Date();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const year = String(now.getFullYear()).slice(-2);
+                const timeStr = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const formattedTime = `${month}/${day}/${year} ${timeStr}`;
+                db.ref('chat').push({ name, msg, time: formattedTime });
             }
             document.getElementById('chat-msg').value = '';
         }
