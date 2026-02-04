@@ -7,6 +7,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <style>
         :root { 
@@ -15,58 +17,74 @@
             --gold: #f39c12; 
             --bg: #121212; 
         }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: #fff; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
-        
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: #fff; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         h2, h4 { text-align: center; width: 100%; margin-top: 5px; }
-
         .card { background: white; color: #333; padding: 15px; border-radius: 12px; width: 100%; max-width: 900px; margin-bottom: 15px; box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.5); overflow: hidden; text-align: center; }
         
-        .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 10px; border-radius: 8px; }
-        
-        #mainTable { border-collapse: collapse; margin: 0 auto; background: white; min-width: 600px; } 
-        #mainTable th, #mainTable td { border: 1px solid #ccc; height: 45px; text-align: center; transition: background-color 0.3s; }
+        /* Table Box Matching Card Styling */
+        .table-wrap { 
+            width: 100%; 
+            max-width: 900px; 
+            background: white; 
+            padding: 15px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+            box-sizing: border-box; 
+            margin-bottom: 15px;
+            overflow-x: auto; 
+            -webkit-overflow-scrolling: touch; 
+        }
+        /* Changed border to black */
+        #mainTable { border-collapse: collapse; margin: 0 auto; background: transparent; min-width: 600px; table-layout: fixed; border: 2px solid #000; } 
+        #mainTable th, #mainTable td { border: 1px solid #000; height: 45px; text-align: center; transition: background-color 0.3s; position: relative; width: 50px; }
         
         .team-top { background: var(--blue); color: white; font-weight: bold; font-size: 14px; transition: 0.3s; }
         .team-side { background: var(--red); color: white; width: 30px; writing-mode: vertical-rl; transform: rotate(180deg); font-weight: bold; font-size: 14px; transition: 0.3s; }
         .num { background: #eee; font-weight: bold; color: #000; font-size: 1.2rem; width: 40px; }
-
-        input.sq { width: 100%; height: 100%; border: none; text-align: center; background: transparent; font-size: 12px; font-weight: bold; outline: none; color: #333; }
+        input.sq { width: 100%; height: 100%; border: none; text-align: center; background: transparent; font-size: 12px; font-weight: bold; outline: none; pointer-events: auto; -webkit-appearance: none; border-radius: 0; }
         
         #activity-ticker { background: #333; color: #4caf50; width: 100%; max-width: 900px; padding: 10px; text-align: center; font-size: 14px; font-weight: bold; border-radius: 8px; margin-bottom: 10px; border-left: 5px solid #4caf50; display: none; box-sizing: border-box; }
         .ticker-anim { animation: flash 1s ease-in-out; }
         @keyframes flash { 0% { background: #4caf50; color: white; } 100% { background: #333; color: #4caf50; } }
-
-        .counter-badge { background: var(--red); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; display: inline-block; margin-bottom: 10px; }
         
-        .winner { background: #fff59d !important; animation: pulse 2s infinite; border: 3px solid var(--gold) !important; box-shadow: inset 0 0 10px var(--gold); }
+        .counter-badge { background: var(--red); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; display: inline-block; margin-bottom: 10px; }
+        .winner { background: #fff59d !important; animation: pulse 2s infinite; border: 3px solid var(--gold) !important; box-shadow: inset 0 0 10px var(--gold); z-index: 10; }
         @keyframes pulse { 0%, 100% { background: #fff59d; } 50% { background: #ffd54f; } }
-
-        button { padding: 10px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; color: white; }
+        
+        button { padding: 10px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; color: white; touch-action: manipulation; }
         .btn-main { background: var(--blue); }
         .btn-share { background: #2196F3; font-size: 14px; margin-top: 10px; width: 100%; }
+        .btn-download { background: #4caf50; font-size: 14px; margin-top: 10px; width: 100%; }
         .btn-gold { background: var(--gold); }
         .btn-reset { background: #607d8b; }
         .btn-del { background: #ff5252; padding: 2px 6px; font-size: 10px; margin-left: 10px; }
-        .color-label { font-size: 11px; color: #666; font-weight: normal; display: block; text-align: center; margin-bottom: 5px; }
-
-        #chat-display { height: 120px; overflow-y: auto; font-size: 13px; border: 1px solid #ddd; padding: 10px; margin-bottom: 8px; background: #fafafa; border-radius: 4px; text-align: center; }
-        .chat-line { margin-bottom: 5px; }
-
-        /* Enhanced Winners List CSS */
+        .color-label { font-size: 11px; color: #666; font-weight: bold; display: block; text-align: center; margin-bottom: 5px; text-transform: uppercase; }
+        
+        #chat-display { height: 120px; overflow-y: auto; font-size: 13px; border: 1px solid #ddd; padding: 10px; margin-bottom: 8px; background: #fafafa; border-radius: 4px; text-align: left; }
+        .chat-line { margin-bottom: 5px; border-bottom: 1px solid #eee; padding-bottom: 2px; }
+        .chat-time { font-size: 10px; color: #999; margin-left: 5px; }
         .win-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; background: #fdfdfd; margin-bottom: 4px; border-radius: 6px; border-left: 4px solid var(--gold); }
         .win-badge { background: var(--gold); color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 11px; margin-right: 8px; text-transform: uppercase; }
+        #standings-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding: 5px; }
+        .standing-item { padding: 5px 10px; border-radius: 15px; font-size: 13px; font-weight: bold; color: #fff; border: 1px solid rgba(0,0,0,0.1); text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
 
         @media (max-width: 600px) {
-            .team-side { width: 20px; font-size: 10px; }
-            #mainTable th, #mainTable td { height: 40px; }
-            .num { font-size: 1rem; width: 30px; }
+            .team-side { width: 25px; font-size: 11px; }
+            #mainTable th, #mainTable td { height: 42px; width: 45px; }
+            .num { font-size: 1.1rem; width: 35px; }
+            h2 { font-size: 1.4rem; }
+            .table-wrap { padding: 10px; }
+        }
+
+        @media (max-height: 500px) and (orientation: landscape) {
+            #mainTable th, #mainTable td { height: 35px; }
+            .card, .table-wrap { padding: 10px; }
         }
     </style>
 </head>
 <body>
 
     <h2 id="header-display">🏈 SUPER BOWL LX 🏈</h2>
-
     <div id="activity-ticker"></div>
 
     <div class="card" id="admin-fields" style="display:none; background: #fff3e0; border: 2px solid #ffcc80;">
@@ -76,37 +94,48 @@
             <button onclick="toggleLock()" id="lock-btn" class="btn-main">🔒 LOCK BOARD</button>
             <button onclick="pushShuffle()" class="btn-gold">🎲 SHUFFLE</button>
             <button onclick="resetNumbersOnly()" class="btn-reset">❓ HIDE NUMS</button>
+            <button onclick="db.ref('confettiTrigger').set(Date.now())" style="background: #9c27b0;">🎉 TEST CONFETTI</button>
             <button onclick="clearWinnerHistory()" style="background: #ef6c00">🏆 CLEAR WINNERS</button>
             <button onclick="globalReset()" style="background: var(--red)">🧹 RESET ALL</button>
+            <button onclick="downloadBoard()" class="btn-download" style="width: auto; margin-top: 0;">📄 DOWNLOAD PDF</button>
         </div>
 
-        <div style="margin-bottom: 12px; padding: 10px; background: #fff; border-radius: 8px; border: 1px solid #ddd;">
-            <label class="color-label">Live Score (Highlights winning square):</label>
-            <div style="display: flex; justify-content: center; align-items: center; gap: 10px;">
-                <input type="number" id="s-top" placeholder="Top Score" oninput="pushScore()" style="width:70px"> 
-                <span>VS</span> 
-                <input type="number" id="s-side" placeholder="Side Score" oninput="pushScore()" style="width:70px">
+        <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 12px; max-width: 400px; margin-left: auto; margin-right: auto;">
+            <div style="padding: 10px; background: #fff; border-radius: 8px; border: 1px solid #ddd;">
+                <label class="color-label">Live Score:</label>
+                <div style="display: flex; justify-content: center; align-items: center; gap: 5px;">
+                    <input type="number" id="s-top" placeholder="Top" oninput="pushScore()" style="width:50px"> 
+                    <span>-</span> 
+                    <input type="number" id="s-side" placeholder="Side" oninput="pushScore()" style="width:50px">
+                </div>
+                <button onclick="saveWinnerPrompt()" class="btn-main" style="margin-top: 8px; font-size: 11px; width: 100%;">💾 SAVE WINNER</button>
             </div>
-            <button onclick="saveWinnerPrompt()" class="btn-main" style="margin-top: 10px; font-size: 12px; width: 100%;">💾 SAVE AS QUARTER WINNER</button>
         </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
             <div>
                 <label class="color-label">Top Team / Color:</label>
                 <div style="display:flex; gap:5px;">
                     <input type="text" id="edit-top" placeholder="Top Name" oninput="pushTeams()" style="width:70%">
-                    <input type="color" id="color-top" value="#002244" oninput="pushTeams()" style="width:30%; height:35px; border:none; padding:0;">
+                    <input type="color" id="color-top" value="#002244" oninput="pushTeams()" style="width:30%; height:35px; border:none;">
                 </div>
             </div>
             <div>
                 <label class="color-label">Side Team / Color:</label>
                 <div style="display:flex; gap:5px;">
                     <input type="text" id="edit-side" placeholder="Side Name" oninput="pushTeams()" style="width:70%">
-                    <input type="color" id="color-side" value="#C60C30" oninput="pushTeams()" style="width:30%; height:35px; border:none; padding:0;">
+                    <input type="color" id="color-side" value="#C60C30" oninput="pushTeams()" style="width:30%; height:35px; border:none;">
                 </div>
             </div>
         </div>
-        <textarea id="rules-editor" style="width:100%; height:50px; margin-top:10px;" oninput="updateRules()" placeholder="Edit house rules here..."></textarea>
+        <textarea id="rules-editor" style="width:100%; height:40px; margin-top:10px;" oninput="updateRules()" placeholder="Edit house rules..."></textarea>
+    </div>
+
+    <div class="card">
+        <h4>🏆 OFFICIAL WINNERS</h4>
+        <div id="winner-list" style="max-height: 200px; overflow-y: auto;">
+            <div style="color:#aaa; font-size:12px; text-align:center;">No winners recorded yet.</div>
+        </div>
     </div>
 
     <div class="card">
@@ -116,18 +145,14 @@
         <button onclick="copyShareLink()" class="btn-share">🔗 SHARE WITH FRIENDS</button>
     </div>
 
-    <div class="table-wrap">
+    <div class="table-wrap" id="capture-area">
         <table id="mainTable">
-            <tr id="top-row-label"></tr>
-            <tr id="top-nums"></tr>
         </table>
     </div>
 
     <div class="card">
-        <h4>🏆 OFFICIAL WINNERS</h4>
-        <div id="winner-list" style="max-height: 200px; overflow-y: auto;">
-            <div style="color:#aaa; font-size:12px; text-align:center;">No winners recorded yet.</div>
-        </div>
+        <h4>📊 SQUARE DISTRIBUTION</h4>
+        <div id="standings-list"><div style="color:#aaa; font-size:12px;">No participants yet.</div></div>
     </div>
 
     <div class="card">
@@ -160,80 +185,99 @@
 
         let isLocked = false, cellOwnership = {};
 
-        function getCellColor(name) {
-            if (!name || name.trim() === "") return "white";
+        function stringToHex(str) {
+            if (!str || str.trim() === "") return "white";
             let hash = 0;
-            for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-            return `hsl(${Math.abs(hash % 360)}, 70%, 92%)`;
+            const clean = str.trim().toUpperCase();
+            for (let i = 0; i < clean.length; i++) {
+                hash = clean.charCodeAt(i) + ((hash << 7) - hash);
+            }
+            const hue = Math.abs((hash ^ (hash >>> 16)) % 360); 
+            return `hsl(${hue}, 80%, 50%)`;
+        }
+
+        function getContrastYIQ(colorStr){
+            if (!colorStr || colorStr === "white") return 'black';
+            return 'white';
         }
 
         function initGrid() {
             const table = document.getElementById('mainTable');
-            document.getElementById('top-row-label').innerHTML = `<th colspan="2" rowspan="2" style="border:none"></th><th colspan="10" class="team-top" id="label-top">TOP</th>`;
+            table.innerHTML = "";
+            let row1 = document.createElement('tr');
+            row1.innerHTML = `<th colspan="2" rowspan="2" style="border:none"></th><th colspan="10" class="team-top" id="label-top">TOP TEAM</th>`;
+            table.appendChild(row1);
+            let row2 = document.createElement('tr');
+            row2.id = "top-nums";
+            for(let i=0; i<10; i++) row2.innerHTML += `<th class="num t-n">?</th>`;
+            table.appendChild(row2);
             for(let r=0; r<10; r++) {
                 let row = document.createElement('tr');
-                if(r === 0) row.innerHTML = `<th rowspan="10" class="team-side" id="label-side">SIDE</th>`;
+                if(r === 0) row.innerHTML = `<th rowspan="10" class="team-side" id="label-side">SIDE TEAM</th>`;
                 row.innerHTML += `<th class="num s-n" id="sn-${r}">?</th>`;
-                for(let c=0; c<10; c++) row.innerHTML += `<td id="cell-${r}${c}"><input class="sq" id="q${r}${c}" onchange="claimSquare('${r}${c}', this.value)"></td>`;
+                for(let c=0; c<10; c++) {
+                    row.innerHTML += `<td id="cell-${r}${c}"><input class="sq" id="q${r}${c}" onchange="claimSquare('${r}${c}', this.value)"></td>`;
+                }
                 table.appendChild(row);
             }
         }
         initGrid();
 
-        function pushTeams() {
-            if(!isAdmin) return;
-            db.ref('teams').set({
-                t: document.getElementById('edit-top').value,
-                s: document.getElementById('edit-side').value,
-                cT: document.getElementById('color-top').value,
-                cS: document.getElementById('color-side').value,
-                pass: 'Number.02superbowl'
+        function downloadBoard() {
+            const area = document.getElementById('mainTable');
+            html2canvas(area, { 
+                scale: 4, 
+                backgroundColor: "#ffffff", 
+                logging: false,
+                useCORS: true,
+                allowTaint: true,
+                onclone: (clonedDoc) => {
+                    const sideLabel = clonedDoc.getElementById('label-side');
+                    if(sideLabel) {
+                        sideLabel.style.display = "table-cell";
+                        sideLabel.style.visibility = "visible";
+                        sideLabel.style.writingMode = "vertical-rl";
+                        sideLabel.style.transform = "rotate(180deg)";
+                    }
+                    clonedDoc.querySelectorAll('td').forEach(td => {
+                        const originalId = td.id;
+                        const originalEl = document.getElementById(originalId);
+                        if(originalEl) td.style.backgroundColor = originalEl.style.backgroundColor;
+                    });
+                }
+            }).then(canvas => {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'px', 'a4');
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                const margin = 20;
+                const availableWidth = pageWidth - (margin * 2);
+                const imgWidth = availableWidth;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                const imgData = canvas.toDataURL('image/png');
+                const yPos = (pageHeight - imgHeight) / 2;
+                pdf.addImage(imgData, 'PNG', margin, yPos, imgWidth, imgHeight);
+                pdf.save('SuperBowlSquares.pdf');
             });
         }
 
-        function copyShareLink() {
-            const url = window.location.origin + window.location.pathname;
-            navigator.clipboard.writeText(url).then(() => alert("Link Copied!"));
-        }
-
-        function updateRules() { if(isAdmin) db.ref('gameRules').set({ text: document.getElementById('rules-editor').value, pass: 'Number.02superbowl' }); }
-        
-        function pushShuffle() { 
-            if(isAdmin) { 
-                if(!confirm("🎲 Shuffle the numbers? This changes coordinates for everyone!")) return;
-                const r = () => [0,1,2,3,4,5,6,7,8,9].sort(() => Math.random()-0.5); 
-                db.ref('nums').set({ t: r(), s: r(), pass: 'Number.02superbowl' }); 
-            } 
-        }
-
-        function resetNumbersOnly() { if (isAdmin && confirm("Hide numbers?")) db.ref('nums').set({ t: null, s: null, pass: 'Number.02superbowl' }); }
-        
-        function globalReset() { 
-            if (isAdmin) {
-                if(confirm("⚠️ WIPE DATABASE? This deletes all names, chat, and winners!")) {
-                    db.ref('/').set({ pass: 'Number.02superbowl' }); 
-                    location.reload(); 
-                }
-            }
-        }
-
-        function clearWinnerHistory() {
-            if (isAdmin && confirm("🏆 Clear the official winners list?")) {
-                db.ref('history').remove();
-            }
-        }
-
+        function pushTeams() { if(isAdmin) db.ref('teams').set({ t: document.getElementById('edit-top').value, s: document.getElementById('edit-side').value, cT: document.getElementById('color-top').value, cS: document.getElementById('color-side').value }); }
+        function updateRules() { if(isAdmin) db.ref('gameRules').set({ text: document.getElementById('rules-editor').value }); }
+        function pushShuffle() { if(isAdmin && confirm("🎲 Shuffle numbers?")) { const r = () => [0,1,2,3,4,5,6,7,8,9].sort(() => Math.random()-0.5); db.ref('nums').set({ t: r(), s: r() }); } }
+        function resetNumbersOnly() { if (isAdmin && confirm("Hide numbers?")) db.ref('nums').set({ t: null, s: null }); }
+        function globalReset() { if (isAdmin && confirm("⚠️ WIPE DATABASE?")) { db.ref('/').remove(); location.reload(); } }
+        function clearWinnerHistory() { if (isAdmin && confirm("🏆 Clear winners list?")) db.ref('history').remove(); }
         function toggleLock() { if(isAdmin) db.ref('isLocked').set(!isLocked); }
         function pushScore() { db.ref('score').set({t:document.getElementById('s-top').value, s:document.getElementById('s-side').value}); }
+        function copyShareLink() { navigator.clipboard.writeText(window.location.origin + window.location.pathname).then(() => alert("Link Copied!")); }
 
         function saveWinnerPrompt() {
             const q = prompt("Which Quarter? (e.g. Q1, Half, Q3, Final)");
             if(!q) return;
             const winnerCell = document.querySelector('.winner input');
-            const name = winnerCell ? winnerCell.value : "Empty Square";
+            const name = (winnerCell && winnerCell.value) ? winnerCell.value : "Empty Square";
             const score = `${document.getElementById('s-top').value}-${document.getElementById('s-side').value}`;
             db.ref('history').push({ q, name, score });
-            // Signal a confetti burst to all users
             db.ref('confettiTrigger').set(Date.now());
         }
 
@@ -241,62 +285,46 @@
 
         function claimSquare(id, val) {
             const inputField = document.getElementById('q' + id);
-            if(isLocked && !isAdmin) {
-                alert("🔒 The board is currently LOCKED!");
-                db.ref('names/'+id).once('value', s => { inputField.value = s.val() || ""; });
-                return;
+            if(isLocked && !isAdmin) { 
+                alert("🔒 Board is LOCKED!"); 
+                db.ref('names/'+id).once('value', s => { inputField.value = s.val() || ""; }); 
+                return; 
             }
-            const isSquareEmpty = !cellOwnership[id] || (inputField.value.trim() === "");
-            const iOwnThis = cellOwnership[id] === myID;
-
-            if (isSquareEmpty || iOwnThis || isAdmin) {
-                if (isSquareEmpty && val.trim() !== "") {
-                    if (!confirm(`Claim this square as "${val}"?`)) {
-                        inputField.value = ""; 
-                        return;
-                    }
+            db.ref('names/'+id).once('value', s => {
+                const currentVal = s.val();
+                if (!currentVal || cellOwnership[id] === myID || isAdmin) {
+                    if (!currentVal && val.trim() !== "" && !confirm(`Claim square as "${val}"?`)) { inputField.value = ""; return; }
+                    db.ref('names/'+id).set(val);
+                    db.ref('owners/'+id).set(myID);
+                    const autoColor = val.trim() !== "" ? stringToHex(val) : "white";
+                    db.ref('userColors/'+val.trim().toLowerCase()).set(autoColor);
+                    if(val.trim() !== "" && !currentVal) db.ref('lastAction').set({ msg: `🔥 ${val} grabbed a square!`, time: Date.now() });
+                } else {
+                    alert("🚫 Square taken!");
+                    inputField.value = currentVal || "";
                 }
-                db.ref('names/'+id).set(val);
-                db.ref('owners/'+id).set(myID);
-                if(val.trim() !== "" && isSquareEmpty) db.ref('lastAction').set({ msg: `🔥 ${val} grabbed a square!`, time: Date.now() });
-            } else {
-                alert("🚫 This square is already taken!");
-                db.ref('names/'+id).once('value', s => { inputField.value = s.val() || ""; });
-            }
+            });
         }
 
         function sendChat() {
             const name = document.getElementById('chat-name').value || "Guest", msg = document.getElementById('chat-msg').value;
-            if(msg) db.ref('chat').push({ name, msg });
+            if(msg) {
+                const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                db.ref('chat').push({ name, msg, time });
+            }
             document.getElementById('chat-msg').value = '';
         }
 
-        // --- Confetti Animation ---
         function fireConfetti() {
-            const count = 200, defaults = { origin: { y: 0.7 } };
-            function fire(particleRatio, opts) {
-                confetti(Object.assign({}, defaults, opts, {
-                    particleCount: Math.floor(count * particleRatio)
-                }));
-            }
-            fire(0.25, { spread: 26, startVelocity: 55 });
-            fire(0.2, { spread: 60 });
-            fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
-            fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
-            fire(0.1, { spread: 120, startVelocity: 45 });
+            const count = 200;
+            const fire = (ratio, opts) => confetti(Object.assign({}, { origin: { y: 0.7 }, particleCount: Math.floor(count * ratio) }, opts));
+            fire(0.25, { spread: 26, startVelocity: 55 }); fire(0.2, { spread: 60 }); fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
         }
 
-        // Listen for remote confetti triggers
         db.ref('confettiTrigger').on('value', s => { if(s.val()) fireConfetti(); });
-
         db.ref('isLocked').on('value', s => { 
             isLocked = s.val() || false;
             document.getElementById('lock-btn').innerText = isLocked ? "🔓 UNLOCK" : "🔒 LOCK";
-            document.querySelectorAll('.sq').forEach(i => {
-                const id = i.id.replace('q','');
-                const foreignOwner = cellOwnership[id] && cellOwnership[id] !== myID;
-                i.readOnly = (isLocked && !isAdmin) || (foreignOwner && !isAdmin);
-            });
         });
 
         db.ref('gameRules/text').on('value', s => {
@@ -312,31 +340,46 @@
             t.classList.remove('ticker-anim'); void t.offsetWidth; t.classList.add('ticker-anim');
         });
 
-        db.ref('names').on('value', s => { 
-            const n = s.val() || {}; 
-            let filledCount = 0;
+        db.ref().on('value', snapshot => {
+            const data = snapshot.val() || {};
+            const names = data.names || {};
+            const userColors = data.userColors || {};
+            let filled = 0, counts = {};
+
             document.querySelectorAll('.sq').forEach(i => {
-                const id = i.id.replace('q','');
-                const val = n[id] || '';
+                const id = i.id.replace('q',''), val = names[id] || '';
                 i.value = val;
-                document.getElementById('cell-'+id).style.backgroundColor = getCellColor(val);
-                if(val.trim() !== "") filledCount++;
+                const colorVal = val.trim() !== "" ? (userColors[val.toLowerCase()] || stringToHex(val)) : "white";
+                document.getElementById('cell-'+id).style.backgroundColor = colorVal;
+                i.style.color = getContrastYIQ(colorVal);
+                if(val.trim() !== "") { filled++; counts[val] = (counts[val] || 0) + 1; }
             }); 
-            const left = 100 - filledCount;
+
+            const left = 100 - filled;
             const b = document.getElementById('squares-left');
             b.innerText = left + " SQUARES LEFT";
             b.style.background = left <= 10 ? "#f39c12" : (left === 0 ? "#4caf50" : "#C60C30");
+
+            const standList = document.getElementById('standings-list');
+            standList.innerHTML = '';
+            const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+            if(sorted.length === 0) standList.innerHTML = '<div style="color:#aaa; font-size:12px;">No participants yet.</div>';
+            sorted.forEach(([name, count]) => { 
+                const colorVal = userColors[name.toLowerCase()] || stringToHex(name);
+                standList.innerHTML += `<div class="standing-item" style="background-color: ${colorVal}; color: ${getContrastYIQ(colorVal)}">${name}: ${count}</div>`; 
+            });
+            refreshWin();
         });
 
         db.ref('owners').on('value', s => { cellOwnership = s.val() || {}; });
-
+        
         db.ref('teams').on('value', s => { 
             const t = s.val() || {t:'Top Team', s:'Side Team', cT:'#002244', cS:'#C60C30'};
             document.getElementById('label-top').innerText = t.t;
             document.getElementById('label-side').innerText = t.s;
             document.documentElement.style.setProperty('--blue', t.cT);
             document.documentElement.style.setProperty('--red', t.cS);
-            if(isAdmin) {
+            if(isAdmin){
                 document.getElementById('edit-top').value = t.t;
                 document.getElementById('edit-side').value = t.s;
                 document.getElementById('color-top').value = t.cT;
@@ -346,12 +389,13 @@
 
         db.ref('nums').on('value', s => { 
             const n = s.val(); 
+            const topRow = document.getElementById('top-nums');
             if(!n || !n.t || !n.s) {
-                document.getElementById('top-nums').innerHTML = Array(10).fill('<th class="num t-n">?</th>').join('');
+                topRow.innerHTML = Array(10).fill('<th class="num t-n">?</th>').join('');
                 for(let i=0; i<10; i++) document.getElementById('sn-'+i).innerText = '?';
                 return;
             }
-            document.getElementById('top-nums').innerHTML = n.t.map(v => `<th class="num t-n">${v}</th>`).join('');
+            topRow.innerHTML = n.t.map(v => `<th class="num t-n">${v}</th>`).join('');
             n.s.forEach((v, i) => document.getElementById('sn-'+i).innerText = v);
             refreshWin();
         });
@@ -365,10 +409,9 @@
 
         db.ref('history').on('value', snap => {
             const list = document.getElementById('winner-list'); list.innerHTML = '';
-            if(!snap.exists()) { list.innerHTML = '<div style="color:#aaa; font-size:12px; text-align:center;">No winners recorded yet.</div>'; return; }
+            if(!snap.exists()) { list.innerHTML = '<div style="color:#aaa; font-size:12px;">No winners yet.</div>'; return; }
             snap.forEach(child => {
-                const d = child.val();
-                const delBtn = isAdmin ? `<button class="btn-del" onclick="deleteWin('${child.key}')">X</button>` : '';
+                const d = child.val(), delBtn = isAdmin ? `<button class="btn-del" onclick="deleteWin('${child.key}')">X</button>` : '';
                 list.innerHTML += `<div class="win-row"><span><span class="win-badge">${d.q}</span><b>${d.name}</b></span><span><small style="color:#666">${d.score}</small>${delBtn}</span></div>`;
             });
         });
@@ -376,21 +419,25 @@
         db.ref('chat').limitToLast(10).on('value', snap => {
             const d = document.getElementById('chat-display'); d.innerHTML = '';
             snap.forEach(c => { 
-                d.innerHTML += `<div class="chat-line"><b>${c.val().name}:</b> ${c.val().msg}</div>`; 
+                const val = c.val();
+                const t = val.time ? `<span class="chat-time">${val.time}</span>` : '';
+                d.innerHTML += `<div class="chat-line"><b>${val.name}:</b> ${val.msg}${t}</div>`; 
             });
             d.scrollTop = d.scrollHeight;
         });
 
         function refreshWin() {
-            const tD = (document.getElementById('s-top').value || "").toString().slice(-1);
-            const sD = (document.getElementById('s-side').value || "").toString().slice(-1);
+            const topScoreVal = document.getElementById('s-top').value;
+            const sideScoreVal = document.getElementById('s-side').value;
             document.querySelectorAll('td').forEach(td => td.classList.remove('winner'));
-            if(tD === "" || sD === "") return;
-            const tI = Array.from(document.querySelectorAll('.t-n')).findIndex(e => e.innerText == tD);
-            const sI = Array.from(document.querySelectorAll('.s-n')).findIndex(e => e.innerText == sD);
-            if(tI > -1 && sI > -1) {
-                const target = document.getElementById('cell-'+sI+tI);
-                if(target) target.classList.add('winner');
+            if(topScoreVal === "" || sideScoreVal === "") return;
+            const tD = topScoreVal.toString().slice(-1), sD = sideScoreVal.toString().slice(-1);
+            const topNums = Array.from(document.querySelectorAll('.t-n')).map(el => el.innerText);
+            const sideNums = Array.from(document.querySelectorAll('.s-n')).map(el => el.innerText);
+            const tI = topNums.indexOf(tD), sI = sideNums.indexOf(sD);
+            if(tI > -1 && sI > -1) { 
+                const target = document.getElementById(`cell-${sI}${tI}`); 
+                if(target) target.classList.add('winner'); 
             }
         }
     </script>
