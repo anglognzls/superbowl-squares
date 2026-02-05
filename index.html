@@ -18,10 +18,20 @@
             --bg: #121212; 
         }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: #fff; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        
+        /* LIVE SCORE STYLES */
+        #live-scoreboard { width: 100%; max-width: 900px; background: #1e1e1e; border-radius: 12px; margin-bottom: 15px; padding: 15px; box-sizing: border-box; border: 1px solid #333; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .score-team { display: flex; flex-direction: column; align-items: center; flex: 1; }
+        .score-team img { width: 40px; height: 40px; margin-bottom: 5px; }
+        .score-name { font-weight: bold; font-size: 14px; text-transform: uppercase; color: #aaa; }
+        .score-pts { font-size: 32px; font-weight: 800; margin: 5px 0; }
+        .score-info { text-align: center; flex: 1; }
+        .score-status { font-size: 12px; color: var(--gold); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        .score-time { font-size: 18px; font-weight: bold; color: #fff; }
+
         h2, h4 { text-align: center; width: 100%; margin-top: 5px; }
         .card { background: white; color: #333; padding: 15px; border-radius: 12px; width: 100%; max-width: 900px; margin-bottom: 15px; box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.5); overflow: hidden; text-align: center; }
         
-        /* Table Box Matching Card Styling */
         .table-wrap { 
             width: 100%; 
             max-width: 900px; 
@@ -34,7 +44,6 @@
             overflow-x: auto; 
             -webkit-overflow-scrolling: touch; 
         }
-        /* Changed border to black */
         #mainTable { border-collapse: collapse; margin: 0 auto; background: transparent; min-width: 600px; table-layout: fixed; border: 2px solid #000; } 
         #mainTable th, #mainTable td { border: 1px solid #000; height: 45px; text-align: center; transition: background-color 0.3s; position: relative; width: 50px; }
         
@@ -83,6 +92,23 @@
     </style>
 </head>
 <body>
+
+    <div id="live-scoreboard">
+        <div class="score-team">
+            <img id="logo-away" src="" alt="">
+            <div class="score-name" id="name-away">AWAY</div>
+            <div class="score-pts" id="pts-away">0</div>
+        </div>
+        <div class="score-info">
+            <div class="score-status" id="game-status">PREGAME</div>
+            <div class="score-time" id="game-clock">6:30 PM</div>
+        </div>
+        <div class="score-team">
+            <img id="logo-home" src="" alt="">
+            <div class="score-name" id="name-home">HOME</div>
+            <div class="score-pts" id="pts-home">0</div>
+        </div>
+    </div>
 
     <h2 id="header-display">🏈 SUPER BOWL LX 🏈</h2>
     <div id="activity-ticker"></div>
@@ -185,6 +211,39 @@
         if (isAdmin) document.getElementById('admin-fields').style.display = 'block';
 
         let isLocked = false, cellOwnership = {};
+
+        /* LIVE SCORE FETCHING LOGIC */
+        async function updateLiveScores() {
+            try {
+                const response = await fetch('https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard');
+                const data = await response.json();
+                
+                // Target Super Bowl LX specifically
+                const event = data.events.find(e => 
+                    e.shortName.includes("SF @ KC") || 
+                    e.name.toLowerCase().includes("super bowl")
+                ) || data.events[0];
+
+                if (!event) return;
+
+                const competitors = event.competitions[0].competitors;
+                const home = competitors.find(c => c.homeAway === 'home');
+                const away = competitors.find(c => c.homeAway === 'away');
+
+                document.getElementById('name-home').innerText = home.team.abbreviation;
+                document.getElementById('logo-home').src = home.team.logo;
+                document.getElementById('pts-home').innerText = home.score;
+
+                document.getElementById('name-away').innerText = away.team.abbreviation;
+                document.getElementById('logo-away').src = away.team.logo;
+                document.getElementById('pts-away').innerText = away.score;
+
+                document.getElementById('game-status').innerText = event.status.type.detail;
+                document.getElementById('game-clock').innerText = event.status.displayClock || "";
+            } catch (e) { console.log("Score fetch error:", e); }
+        }
+        setInterval(updateLiveScores, 30000); // Update every 30 seconds
+        updateLiveScores();
 
         function stringToHex(str) {
             if (!str || str.trim() === "") return "white";
