@@ -269,7 +269,7 @@
             table.appendChild(row1);
             let row2 = document.createElement('tr');
             row2.id = "top-nums";
-            for(let i=0; i<10; i++) row2.innerHTML += `<th class="num t-n">?</th>`;
+            for(let i=0; i<10; i++) row2.innerHTML += `<th class="num t-n" id="tn-${i}">?</th>`;
             table.appendChild(row2);
             for(let r=0; r<10; r++) {
                 let row = document.createElement('tr');
@@ -323,8 +323,20 @@
 
         function pushTeams() { if(isAdmin) db.ref('teams').set({ t: document.getElementById('edit-top').value, s: document.getElementById('edit-side').value, cT: document.getElementById('color-top').value, cS: document.getElementById('color-side').value }); }
         function updateRules() { if(isAdmin) db.ref('gameRules').set({ text: document.getElementById('rules-editor').value }); }
-        function pushShuffle() { if(isAdmin && confirm("🎲 Shuffle numbers?")) { const r = () => [0,1,2,3,4,5,6,7,8,9].sort(() => Math.random()-0.5); db.ref('nums').set({ t: r(), s: r() }); } }
-        function resetNumbersOnly() { if (isAdmin && confirm("Hide numbers?")) db.ref('nums').set({ t: null, s: null }); }
+        
+        function pushShuffle() { 
+            if(isAdmin && confirm("🎲 Shuffle numbers?")) { 
+                const shuffle = () => [0,1,2,3,4,5,6,7,8,9].sort(() => Math.random()-0.5); 
+                db.ref('nums').set({ t: shuffle(), s: shuffle() }); 
+            } 
+        }
+        
+        function resetNumbersOnly() { 
+            if (isAdmin && confirm("Hide numbers?")) {
+                db.ref('nums').set({ t: "hidden", s: "hidden" }); 
+            }
+        }
+
         function globalReset() { if (isAdmin && confirm("⚠️ WIPE DATABASE?")) { db.ref('/').remove(); location.reload(); } }
         function clearWinnerHistory() { if (isAdmin && confirm("🏆 Clear winners list?")) db.ref('history').remove(); }
         function clearChatHistory() { if (isAdmin && confirm("💬 Clear all chat messages?")) db.ref('chat').remove(); }
@@ -455,14 +467,15 @@
 
         db.ref('nums').on('value', s => { 
             const n = s.val(); 
-            const topRow = document.getElementById('top-nums');
-            if(!n || !n.t || !n.s) {
-                topRow.innerHTML = Array(10).fill('<th class="num t-n">?</th>').join('');
-                for(let i=0; i<10; i++) document.getElementById('sn-'+i).innerText = '?';
-                return;
+            if(!n || n.t === "hidden" || n.s === "hidden") {
+                for(let i=0; i<10; i++) {
+                    document.getElementById('tn-'+i).innerText = '?';
+                    document.getElementById('sn-'+i).innerText = '?';
+                }
+            } else {
+                if(n.t) n.t.forEach((v, i) => document.getElementById('tn-'+i).innerText = v);
+                if(n.s) n.s.forEach((v, i) => document.getElementById('sn-'+i).innerText = v);
             }
-            topRow.innerHTML = n.t.map(v => `<th class="num t-n">${v}</th>`).join('');
-            n.s.forEach((v, i) => document.getElementById('sn-'+i).innerText = v);
             refreshWin();
         });
 
