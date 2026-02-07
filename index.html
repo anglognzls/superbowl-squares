@@ -19,7 +19,6 @@
         }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: #fff; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
-        /* LIVE SCORE STYLES */
         #live-scoreboard { width: 100%; max-width: 900px; background: #1e1e1e; border-radius: 12px; margin-bottom: 15px; padding: 15px; box-sizing: border-box; border: 1px solid #333; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .score-team { display: flex; flex-direction: column; align-items: center; flex: 1; }
         .score-team img { width: 40px; height: 40px; margin-bottom: 5px; }
@@ -32,35 +31,24 @@
         h2, h4 { text-align: center; width: 100%; margin-top: 5px; }
         .card { background: white; color: #333; padding: 15px; border-radius: 12px; width: 100%; max-width: 900px; margin-bottom: 15px; box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.5); overflow: hidden; text-align: center; }
         
-        .table-wrap { 
-            width: 100%; 
-            max-width: 900px; 
-            background: white; 
-            padding: 15px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
-            box-sizing: border-box; 
-            margin-bottom: 15px;
-            overflow-x: auto; 
-            -webkit-overflow-scrolling: touch; 
-        }
-        #mainTable { border-collapse: collapse; margin: 0 auto; background: transparent; min-width: 600px; table-layout: fixed; border: 2px solid #000; } 
-        #mainTable th, #mainTable td { border: 1px solid #000; height: 45px; text-align: center; transition: background-color 0.3s; position: relative; width: 50px; }
+        .table-wrap { width: 100%; max-width: 900px; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); box-sizing: border-box; margin-bottom: 15px; overflow-x: auto; }
+        #mainTable { border-collapse: collapse; margin: 0 auto; min-width: 600px; table-layout: fixed; border: 2px solid #000; } 
+        #mainTable th, #mainTable td { border: 1px solid #000; height: 45px; text-align: center; width: 50px; }
         
-        .team-top { background: var(--blue); color: white; font-weight: bold; font-size: 14px; transition: 0.3s; }
-        .team-side { background: var(--red); color: white; width: 30px; writing-mode: vertical-rl; transform: rotate(180deg); font-weight: bold; font-size: 14px; transition: 0.3s; }
+        .team-top { background: var(--blue); color: white; font-weight: bold; font-size: 14px; }
+        .team-side { background: var(--red); color: white; width: 30px; writing-mode: vertical-rl; transform: rotate(180deg); font-weight: bold; font-size: 14px; }
         .num { background: #eee; font-weight: bold; color: #000; font-size: 1.2rem; width: 40px; }
-        input.sq { width: 100%; height: 100%; border: none; text-align: center; background: transparent; font-size: 12px; font-weight: bold; outline: none; pointer-events: auto; -webkit-appearance: none; border-radius: 0; }
+        input.sq { width: 100%; height: 100%; border: none; text-align: center; background: transparent; font-size: 12px; font-weight: bold; outline: none; }
         
-        #activity-ticker { background: #333; color: #4caf50; width: 100%; max-width: 900px; padding: 10px; text-align: center; font-size: 14px; font-weight: bold; border-radius: 8px; margin-bottom: 10px; border-left: 5px solid #4caf50; display: none; box-sizing: border-box; }
+        #activity-ticker { background: #333; color: #4caf50; width: 100%; max-width: 900px; padding: 10px; text-align: center; font-size: 14px; font-weight: bold; border-radius: 8px; margin-bottom: 10px; border-left: 5px solid #4caf50; display: none; }
         .ticker-anim { animation: flash 1s ease-in-out; }
         @keyframes flash { 0% { background: #4caf50; color: white; } 100% { background: #333; color: #4caf50; } }
         
         .counter-badge { background: var(--red); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; display: inline-block; margin-bottom: 10px; }
-        .winner { background: #fff59d !important; animation: pulse 2s infinite; border: 3px solid var(--gold) !important; box-shadow: inset 0 0 10px var(--gold); z-index: 10; }
+        .winner { background: #fff59d !important; animation: pulse 2s infinite; border: 3px solid var(--gold) !important; box-shadow: inset 0 0 10px var(--gold); }
         @keyframes pulse { 0%, 100% { background: #fff59d; } 50% { background: #ffd54f; } }
         
-        button { padding: 10px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; color: white; touch-action: manipulation; }
+        button { padding: 10px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; color: white; }
         .btn-main { background: var(--blue); }
         .btn-share { background: #2196F3; font-size: 14px; margin-top: 10px; width: 100%; }
         .btn-download { background: #4caf50; font-size: 14px; margin-top: 10px; width: 100%; }
@@ -69,25 +57,17 @@
         .btn-del { background: #ff5252; padding: 2px 6px; font-size: 10px; margin-left: 10px; }
         .color-label { font-size: 11px; color: #666; font-weight: bold; display: block; text-align: center; margin-bottom: 5px; text-transform: uppercase; }
         
-        #chat-display { height: 120px; overflow-y: auto; font-size: 13px; border: 1px solid #ddd; padding: 10px; margin-bottom: 8px; background: #fafafa; border-radius: 4px; text-align: left; }
-        .chat-line { margin-bottom: 5px; border-bottom: 1px solid #eee; padding-bottom: 2px; }
-        .chat-time { font-size: 10px; color: #999; margin-left: 5px; }
+        #chat-display { height: 120px; overflow-y: auto; font-size: 13px; border: 1px solid #ddd; padding: 10px; margin-bottom: 8px; background: #fafafa; border-radius: 4px; text-align: left; color: #333; }
+        .chat-line { margin-bottom: 5px; border-bottom: 1px solid #eee; }
         .win-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; background: #fdfdfd; margin-bottom: 4px; border-radius: 6px; border-left: 4px solid var(--gold); }
-        .win-badge { background: var(--gold); color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 11px; margin-right: 8px; text-transform: uppercase; }
+        .win-badge { background: var(--gold); color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 11px; margin-right: 8px; }
         #standings-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding: 5px; }
-        .standing-item { padding: 5px 10px; border-radius: 15px; font-size: 13px; font-weight: bold; color: #fff; border: 1px solid rgba(0,0,0,0.1); text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+        .standing-item { padding: 5px 10px; border-radius: 15px; font-size: 13px; font-weight: bold; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
 
         @media (max-width: 600px) {
             .team-side { width: 25px; font-size: 11px; }
             #mainTable th, #mainTable td { height: 42px; width: 45px; }
             .num { font-size: 1.1rem; width: 35px; }
-            h2 { font-size: 1.4rem; }
-            .table-wrap { padding: 10px; }
-        }
-
-        @media (max-height: 500px) and (orientation: landscape) {
-            #mainTable th, #mainTable td { height: 35px; }
-            .card, .table-wrap { padding: 10px; }
         }
     </style>
 </head>
@@ -115,7 +95,6 @@
 
     <div class="card" id="admin-fields" style="display:none; background: #fff3e0; border: 2px solid #ffcc80;">
         <h4 style="color: #e65100;">COMMISSIONER DASHBOARD</h4>
-        
         <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content: center; margin-bottom:12px;">
             <button onclick="toggleLock()" id="lock-btn" class="btn-main">🔒 LOCK BOARD</button>
             <button onclick="pushShuffle()" class="btn-gold">🎲 SHUFFLE</button>
@@ -126,7 +105,6 @@
             <button onclick="globalReset()" style="background: var(--red)">🧹 RESET ALL</button>
             <button onclick="downloadBoard()" class="btn-download" style="width: auto; margin-top: 0;">📄 DOWNLOAD PDF</button>
         </div>
-
         <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 12px; max-width: 400px; margin-left: auto; margin-right: auto;">
             <div style="padding: 10px; background: #fff; border-radius: 8px; border: 1px solid #ddd;">
                 <label class="color-label">Live Score:</label>
@@ -138,48 +116,27 @@
                 <button onclick="saveWinnerPrompt()" class="btn-main" style="margin-top: 8px; font-size: 11px; width: 100%;">💾 SAVE WINNER</button>
             </div>
         </div>
-
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <div>
-                <label class="color-label">Top Team / Color:</label>
-                <div style="display:flex; gap:5px;">
-                    <input type="text" id="edit-top" placeholder="Top Name" oninput="pushTeams()" style="width:70%">
-                    <input type="color" id="color-top" value="#002244" oninput="pushTeams()" style="width:30%; height:35px; border:none;">
-                </div>
-            </div>
-            <div>
-                <label class="color-label">Side Team / Color:</label>
-                <div style="display:flex; gap:5px;">
-                    <input type="text" id="edit-side" placeholder="Side Name" oninput="pushTeams()" style="width:70%">
-                    <input type="color" id="color-side" value="#C60C30" oninput="pushTeams()" style="width:30%; height:35px; border:none;">
-                </div>
-            </div>
-        </div>
-        <textarea id="rules-editor" style="width:100%; height:40px; margin-top:10px;" oninput="updateRules()" placeholder="Edit house rules..."></textarea>
     </div>
 
     <div class="card">
         <h4>🏆 OFFICIAL WINNERS</h4>
-        <div id="winner-list" style="max-height: 200px; overflow-y: auto;">
-            <div style="color:#aaa; font-size:12px; text-align:center;">No winners recorded yet.</div>
-        </div>
+        <div id="winner-list"></div>
     </div>
 
     <div class="card">
         <div class="counter-badge" id="squares-left">100 Left</div>
         <h4>📜 HOUSE RULES</h4>
-        <div id="rules-text" style="font-size: 14px; white-space: pre-wrap; text-align: center;">Loading rules...</div>
+        <div id="rules-text">Loading rules...</div>
         <button onclick="copyShareLink()" class="btn-share">🔗 SHARE WITH FRIENDS</button>
     </div>
 
     <div class="table-wrap" id="capture-area">
-        <table id="mainTable">
-        </table>
+        <table id="mainTable"></table>
     </div>
 
     <div class="card">
         <h4>📊 SQUARE DISTRIBUTION</h4>
-        <div id="standings-list"><div style="color:#aaa; font-size:12px;">No participants yet.</div></div>
+        <div id="standings-list"></div>
     </div>
 
     <div class="card">
@@ -212,60 +169,37 @@
 
         let isLocked = false, cellOwnership = {};
 
-        /* LIVE SCORE FETCHING LOGIC */
         async function updateLiveScores() {
             try {
                 const response = await fetch('https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard');
                 const data = await response.json();
-                
-                // Target Super Bowl LX specifically
-                const event = data.events.find(e => 
-                    e.shortName.includes("SF @ KC") || 
-                    e.name.toLowerCase().includes("super bowl")
-                ) || data.events[0];
-
+                const event = data.events[0];
                 if (!event) return;
-
-                const competitors = event.competitions[0].competitors;
-                const home = competitors.find(c => c.homeAway === 'home');
-                const away = competitors.find(c => c.homeAway === 'away');
-
+                const comps = event.competitions[0].competitors;
+                const home = comps.find(c => c.homeAway === 'home'), away = comps.find(c => c.homeAway === 'away');
                 document.getElementById('name-home').innerText = home.team.abbreviation;
                 document.getElementById('logo-home').src = home.team.logo;
                 document.getElementById('pts-home').innerText = home.score;
-
                 document.getElementById('name-away').innerText = away.team.abbreviation;
                 document.getElementById('logo-away').src = away.team.logo;
                 document.getElementById('pts-away').innerText = away.score;
-
                 document.getElementById('game-status').innerText = event.status.type.detail;
-                document.getElementById('game-clock').innerText = event.status.displayClock || "";
-            } catch (e) { console.log("Score fetch error:", e); }
+            } catch (e) { console.log(e); }
         }
-        setInterval(updateLiveScores, 30000); // Update every 30 seconds
-        updateLiveScores();
+        setInterval(updateLiveScores, 30000); updateLiveScores();
 
         function stringToHex(str) {
-            if (!str || str.trim() === "") return "white";
+            if (!str) return "white";
             let hash = 0;
-            const clean = str.trim().toUpperCase();
-            for (let i = 0; i < clean.length; i++) {
-                hash = clean.charCodeAt(i) + ((hash << 7) - hash);
-            }
-            const hue = Math.abs((hash ^ (hash >>> 16)) % 360); 
-            return `hsl(${hue}, 80%, 50%)`;
-        }
-
-        function getContrastYIQ(colorStr){
-            if (!colorStr || colorStr === "white") return 'black';
-            return 'white';
+            for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            return `hsl(${Math.abs(hash % 360)}, 70%, 50%)`;
         }
 
         function initGrid() {
             const table = document.getElementById('mainTable');
             table.innerHTML = "";
             let row1 = document.createElement('tr');
-            row1.innerHTML = `<th colspan="2" rowspan="2" style="border:none"></th><th colspan="10" class="team-top" id="label-top">TOP TEAM</th>`;
+            row1.innerHTML = `<th colspan="2" rowspan="2"></th><th colspan="10" class="team-top" id="label-top">TOP TEAM</th>`;
             table.appendChild(row1);
             let row2 = document.createElement('tr');
             row2.id = "top-nums";
@@ -275,250 +209,76 @@
                 let row = document.createElement('tr');
                 if(r === 0) row.innerHTML = `<th rowspan="10" class="team-side" id="label-side">SIDE TEAM</th>`;
                 row.innerHTML += `<th class="num s-n" id="sn-${r}">?</th>`;
-                for(let c=0; c<10; c++) {
-                    row.innerHTML += `<td id="cell-${r}${c}"><input class="sq" id="q${r}${c}" onchange="claimSquare('${r}${c}', this.value)"></td>`;
-                }
+                for(let c=0; c<10; c++) row.innerHTML += `<td id="cell-${r}${c}"><input class="sq" id="q${r}${c}" onchange="claimSquare('${r}${c}', this.value)"></td>`;
                 table.appendChild(row);
             }
         }
         initGrid();
 
-        function downloadBoard() {
-            const area = document.getElementById('mainTable');
-            html2canvas(area, { 
-                scale: 4, 
-                backgroundColor: "#ffffff", 
-                logging: false,
-                useCORS: true,
-                allowTaint: true,
-                onclone: (clonedDoc) => {
-                    const sideLabel = clonedDoc.getElementById('label-side');
-                    if(sideLabel) {
-                        sideLabel.style.display = "table-cell";
-                        sideLabel.style.visibility = "visible";
-                        sideLabel.style.writingMode = "vertical-rl";
-                        sideLabel.style.transform = "rotate(180deg)";
-                    }
-                    clonedDoc.querySelectorAll('td').forEach(td => {
-                        const originalId = td.id;
-                        const originalEl = document.getElementById(originalId);
-                        if(originalEl) td.style.backgroundColor = originalEl.style.backgroundColor;
-                    });
-                }
-            }).then(canvas => {
-                const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF('p', 'px', 'a4');
-                const pageWidth = pdf.internal.pageSize.getWidth();
-                const pageHeight = pdf.internal.pageSize.getHeight();
-                const margin = 20;
-                const availableWidth = pageWidth - (margin * 2);
-                const imgWidth = availableWidth;
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                const imgData = canvas.toDataURL('image/png');
-                const yPos = (pageHeight - imgHeight) / 2;
-                pdf.addImage(imgData, 'PNG', margin, yPos, imgWidth, imgHeight);
-                pdf.save('SuperBowlSquares.pdf');
-            });
-        }
-
-        function pushTeams() { if(isAdmin) db.ref('teams').set({ t: document.getElementById('edit-top').value, s: document.getElementById('edit-side').value, cT: document.getElementById('color-top').value, cS: document.getElementById('color-side').value }); }
-        function updateRules() { if(isAdmin) db.ref('gameRules').set({ text: document.getElementById('rules-editor').value }); }
-        
-        function pushShuffle() { 
-            if(isAdmin && confirm("🎲 Shuffle numbers?")) { 
-                const shuffle = () => [0,1,2,3,4,5,6,7,8,9].sort(() => Math.random()-0.5); 
-                db.ref('nums').set({ t: shuffle(), s: shuffle() }); 
-            } 
-        }
-        
-        function resetNumbersOnly() { 
-            if (isAdmin && confirm("Hide numbers?")) {
-                db.ref('nums').set({ t: "hidden", s: "hidden" }); 
-            }
-        }
-
-        function globalReset() { if (isAdmin && confirm("⚠️ WIPE DATABASE?")) { db.ref('/').remove(); location.reload(); } }
-        function clearWinnerHistory() { if (isAdmin && confirm("🏆 Clear winners list?")) db.ref('history').remove(); }
-        function clearChatHistory() { if (isAdmin && confirm("💬 Clear all chat messages?")) db.ref('chat').remove(); }
+        function pushShuffle() { if(isAdmin && confirm("Shuffle?")) { const s = () => [0,1,2,3,4,5,6,7,8,9].sort(() => Math.random()-0.5); db.ref('nums').set({ t: s(), s: s() }); } }
+        function resetNumbersOnly() { if (isAdmin && confirm("Hide numbers?")) db.ref('nums').set({ t: "hidden", s: "hidden" }); }
         function toggleLock() { if(isAdmin) db.ref('isLocked').set(!isLocked); }
         function pushScore() { db.ref('score').set({t:document.getElementById('s-top').value, s:document.getElementById('s-side').value}); }
-        function copyShareLink() { navigator.clipboard.writeText(window.location.origin + window.location.pathname).then(() => alert("Link Copied!")); }
-
-        function saveWinnerPrompt() {
-            const q = prompt("Which Quarter? (e.g. Q1, Half, Q3, Final)");
-            if(!q) return;
-            const winnerCell = document.querySelector('.winner input');
-            const name = (winnerCell && winnerCell.value) ? winnerCell.value : "Empty Square";
-            const score = `${document.getElementById('s-top').value}-${document.getElementById('s-side').value}`;
-            db.ref('history').push({ q, name, score });
-            db.ref('confettiTrigger').set(Date.now());
-        }
-
-        function deleteWin(key) { if(isAdmin && confirm("Delete record?")) db.ref('history/'+key).remove(); }
+        function globalReset() { if (isAdmin && confirm("Wipe board?")) db.ref('/').remove(); }
+        function clearWinnerHistory() { if (isAdmin) db.ref('history').remove(); }
+        function clearChatHistory() { if (isAdmin) db.ref('chat').remove(); }
 
         function claimSquare(id, val) {
-            const inputField = document.getElementById('q' + id);
-            if(isLocked && !isAdmin) { 
-                alert("🔒 Board is LOCKED!"); 
-                db.ref('names/'+id).once('value', s => { inputField.value = s.val() || ""; }); 
-                return; 
-            }
-            db.ref('names/'+id).once('value', s => {
-                const currentVal = s.val();
-                if (!currentVal || cellOwnership[id] === myID || isAdmin) {
-                    if (!currentVal && val.trim() !== "" && !confirm(`Claim square as "${val}"?`)) { inputField.value = ""; return; }
-                    db.ref('names/'+id).set(val);
-                    db.ref('owners/'+id).set(myID);
-                    const autoColor = val.trim() !== "" ? stringToHex(val) : "white";
-                    db.ref('userColors/'+val.trim().toLowerCase()).set(autoColor);
-                    if(val.trim() !== "" && !currentVal) db.ref('lastAction').set({ msg: `🔥 ${val} grabbed a square!`, time: Date.now() });
-                } else {
-                    alert("🚫 Square taken!");
-                    inputField.value = currentVal || "";
-                }
-            });
+            if(isLocked && !isAdmin) { alert("Locked!"); return; }
+            db.ref('names/'+id).set(val);
+            db.ref('owners/'+id).set(myID);
         }
 
-        function sendChat() {
-            const name = document.getElementById('chat-name').value || "Guest", msg = document.getElementById('chat-msg').value;
-            if(msg) {
-                const now = new Date();
-                const month = String(now.getMonth() + 1).padStart(2, '0');
-                const day = String(now.getDate()).padStart(2, '0');
-                const year = String(now.getFullYear()).slice(-2);
-                const timeStr = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                const formattedTime = `${month}/${day}/${year} ${timeStr}`;
-                db.ref('chat').push({ name, msg, time: formattedTime });
-            }
-            document.getElementById('chat-msg').value = '';
-        }
-
-        function fireConfetti() {
-            const count = 200;
-            const fire = (ratio, opts) => confetti(Object.assign({}, { origin: { y: 0.7 }, particleCount: Math.floor(count * ratio) }, opts));
-            fire(0.25, { spread: 26, startVelocity: 55 }); fire(0.2, { spread: 60 }); fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
-        }
-
-        db.ref('confettiTrigger').on('value', s => { if(s.val()) fireConfetti(); });
         db.ref('isLocked').on('value', s => { 
             isLocked = s.val() || false;
-            document.getElementById('lock-btn').innerText = isLocked ? "🔓 UNLOCK" : "🔒 LOCK";
-        });
-
-        db.ref('gameRules/text').on('value', s => {
-            const val = s.val() || "Click squares to join!";
-            document.getElementById('rules-text').innerText = val;
-            if(isAdmin) document.getElementById('rules-editor').value = val;
-        });
-
-        db.ref('lastAction').on('value', s => {
-            const d = s.val(); if(!d) return;
-            const t = document.getElementById('activity-ticker');
-            t.innerText = d.msg; t.style.display = 'block';
-            t.classList.remove('ticker-anim'); void t.offsetWidth; t.classList.add('ticker-anim');
-        });
-
-        db.ref().on('value', snapshot => {
-            const data = snapshot.val() || {};
-            const names = data.names || {};
-            const userColors = data.userColors || {};
-            let filled = 0, counts = {};
-
-            document.querySelectorAll('.sq').forEach(i => {
-                const id = i.id.replace('q',''), val = names[id] || '';
-                i.value = val;
-                const colorVal = val.trim() !== "" ? (userColors[val.toLowerCase()] || stringToHex(val)) : "white";
-                document.getElementById('cell-'+id).style.backgroundColor = colorVal;
-                i.style.color = getContrastYIQ(colorVal);
-                if(val.trim() !== "") { filled++; counts[val] = (counts[val] || 0) + 1; }
-            }); 
-
-            const left = 100 - filled;
-            const b = document.getElementById('squares-left');
-            b.innerText = left + " SQUARES LEFT";
-            b.style.background = left <= 10 ? "#f39c12" : (left === 0 ? "#4caf50" : "#C60C30");
-
-            const standList = document.getElementById('standings-list');
-            standList.innerHTML = '';
-            const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]);
-            if(sorted.length === 0) standList.innerHTML = '<div style="color:#aaa; font-size:12px;">No participants yet.</div>';
-            sorted.forEach(([name, count]) => { 
-                const colorVal = userColors[name.toLowerCase()] || stringToHex(name);
-                standList.innerHTML += `<div class="standing-item" style="background-color: ${colorVal}; color: ${getContrastYIQ(colorVal)}">${name}: ${count}</div>`; 
-            });
-            refreshWin();
-        });
-
-        db.ref('owners').on('value', s => { cellOwnership = s.val() || {}; });
-        
-        db.ref('teams').on('value', s => { 
-            const t = s.val() || {t:'Top Team', s:'Side Team', cT:'#002244', cS:'#C60C30'};
-            document.getElementById('label-top').innerText = t.t;
-            document.getElementById('label-side').innerText = t.s;
-            document.documentElement.style.setProperty('--blue', t.cT);
-            document.documentElement.style.setProperty('--red', t.cS);
-            if(isAdmin){
-                document.getElementById('edit-top').value = t.t;
-                document.getElementById('edit-side').value = t.s;
-                document.getElementById('color-top').value = t.cT;
-                document.getElementById('color-side').value = t.cS;
-            }
+            document.getElementById('lock-btn').innerText = isLocked ? "🔓 UNLOCK BOARD" : "🔒 LOCK BOARD";
         });
 
         db.ref('nums').on('value', s => { 
-            const n = s.val(); 
-            if(!n || n.t === "hidden" || n.s === "hidden") {
-                for(let i=0; i<10; i++) {
-                    document.getElementById('tn-'+i).innerText = '?';
-                    document.getElementById('sn-'+i).innerText = '?';
-                }
+            const n = s.val();
+            if(!n || n.t === "hidden") {
+                for(let i=0; i<10; i++) { document.getElementById('tn-'+i).innerText='?'; document.getElementById('sn-'+i).innerText='?'; }
             } else {
-                if(n.t) n.t.forEach((v, i) => document.getElementById('tn-'+i).innerText = v);
-                if(n.s) n.s.forEach((v, i) => document.getElementById('sn-'+i).innerText = v);
+                n.t.forEach((v, i) => document.getElementById('tn-'+i).innerText = v);
+                n.s.forEach((v, i) => document.getElementById('sn-'+i).innerText = v);
             }
             refreshWin();
         });
 
-        db.ref('score').on('value', s => { 
-            const sc = s.val() || {t:0, s:0};
-            document.getElementById('s-top').value = sc.t; 
-            document.getElementById('s-side').value = sc.s;
+        db.ref().on('value', snap => {
+            const data = snap.val() || {}, names = data.names || {};
+            let filled = 0;
+            document.querySelectorAll('.sq').forEach(i => {
+                const id = i.id.replace('q',''), val = names[id] || '';
+                i.value = val;
+                document.getElementById('cell-'+id).style.backgroundColor = val ? stringToHex(val) : "white";
+                if(val) filled++;
+            });
+            document.getElementById('squares-left').innerText = (100 - filled) + " Left";
             refreshWin();
-        });
-
-        db.ref('history').on('value', snap => {
-            const list = document.getElementById('winner-list'); list.innerHTML = '';
-            if(!snap.exists()) { list.innerHTML = '<div style="color:#aaa; font-size:12px;">No winners yet.</div>'; return; }
-            snap.forEach(child => {
-                const d = child.val(), delBtn = isAdmin ? `<button class="btn-del" onclick="deleteWin('${child.key}')">X</button>` : '';
-                list.innerHTML += `<div class="win-row"><span><span class="win-badge">${d.q}</span><b>${d.name}</b></span><span><small style="color:#666">${d.score}</small>${delBtn}</span></div>`;
-            });
-        });
-
-        db.ref('chat').limitToLast(10).on('value', snap => {
-            const d = document.getElementById('chat-display'); d.innerHTML = '';
-            snap.forEach(c => { 
-                const val = c.val();
-                const t = val.time ? `<span class="chat-time">${val.time}</span>` : '';
-                d.innerHTML += `<div class="chat-line"><b>${val.name}:</b> ${val.msg}${t}</div>`; 
-            });
-            d.scrollTop = d.scrollHeight;
         });
 
         function refreshWin() {
-            const topScoreVal = document.getElementById('s-top').value;
-            const sideScoreVal = document.getElementById('s-side').value;
+            const tV = document.getElementById('s-top').value, sV = document.getElementById('s-side').value;
             document.querySelectorAll('td').forEach(td => td.classList.remove('winner'));
-            if(topScoreVal === "" || sideScoreVal === "") return;
-            const tD = topScoreVal.toString().slice(-1), sD = sideScoreVal.toString().slice(-1);
-            const topNums = Array.from(document.querySelectorAll('.t-n')).map(el => el.innerText);
-            const sideNums = Array.from(document.querySelectorAll('.s-n')).map(el => el.innerText);
-            const tI = topNums.indexOf(tD), sI = sideNums.indexOf(sD);
-            if(tI > -1 && sI > -1) { 
-                const target = document.getElementById(`cell-${sI}${tI}`); 
-                if(target) target.classList.add('winner'); 
-            }
+            if(tV==="" || sV==="") return;
+            const tD = tV.slice(-1), sD = sV.slice(-1);
+            const tN = Array.from(document.querySelectorAll('.t-n')).map(el => el.innerText);
+            const sN = Array.from(document.querySelectorAll('.s-n')).map(el => el.innerText);
+            const tI = tN.indexOf(tD), sI = sN.indexOf(sD);
+            if(tI > -1 && sI > -1) document.getElementById(`cell-${sI}${tI}`).classList.add('winner');
         }
+
+        function copyShareLink() { navigator.clipboard.writeText(window.location.href); alert("Copied!"); }
+        function sendChat() {
+            const n = document.getElementById('chat-name').value || "Guest", m = document.getElementById('chat-msg').value;
+            if(m) db.ref('chat').push({ name: n, msg: m });
+            document.getElementById('chat-msg').value = '';
+        }
+        db.ref('chat').limitToLast(10).on('value', snap => {
+            const d = document.getElementById('chat-display'); d.innerHTML = '';
+            snap.forEach(c => { d.innerHTML += `<div><b>${c.val().name}:</b> ${c.val().msg}</div>`; });
+        });
     </script>
 </body>
 </html>
